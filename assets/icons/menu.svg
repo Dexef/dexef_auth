@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+  <g id="menu" transform="translate(-308 -585)">
+    <g id="Rectangle_17195" data-name="Rectangle 17195" transform="translate(308 585)" fill="#929fb2" stroke="#707070" stroke-width="1" opacity="0">
+      <rect width="20" height="20" stroke="none"/>
+      <rect x="0.5" y="0.5" width="19" height="19" fill="none"/>
+    </g>
+    <path id="icons8_more_4" d="M6,10a2,2,0,1,0,2,2A2,2,0,0,0,6,10Zm6,0a2,2,0,1,0,2,2A2,2,0,0,0,12,10Zm6,0a2,2,0,1,0,2,2A2,2,0,0,0,18,10Z" transform="translate(330 583) rotate(90)" fill="#929fb2"/>
+  </g>
+</svg>

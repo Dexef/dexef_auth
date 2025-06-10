@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <g id="device" transform="translate(4382)">
+    <rect id="Rectangle_16412" data-name="Rectangle 16412" width="24" height="24" rx="4" transform="translate(-4382)" fill="#5d718d" opacity="0"/>
+    <path id="icons8_multiple_devices" d="M2.667,4A1.343,1.343,0,0,0,1.333,5.333V12a1.343,1.343,0,0,0,1.333,1.333H0v1.333H8.667V12h-6V5.333h12A1.343,1.343,0,0,0,13.333,4Zm8.667,2.667A1.335,1.335,0,0,0,10,8v6.667A1.335,1.335,0,0,0,11.333,16h3.333A1.335,1.335,0,0,0,16,14.667V8a1.335,1.335,0,0,0-1.333-1.333Zm0,1.333h3.333v6H11.333Z" transform="translate(-4378 2)" fill="#5d718d"/>
+  </g>
+</svg>

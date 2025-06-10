@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <g id="back" transform="translate(22383)">
+    <g id="Rectangle_16533" data-name="Rectangle 16533" transform="translate(-22383)" fill="#fff" stroke="#707070" stroke-width="1" opacity="0">
+      <rect width="32" height="32" stroke="none"/>
+      <rect x="0.5" y="0.5" width="31" height="31" fill="none"/>
+    </g>
+    <path id="icons8_back_to_1" d="M15.333,2A13.333,13.333,0,1,0,28.667,15.333,13.333,13.333,0,0,0,15.333,2Zm4,20H15.975a1.334,1.334,0,0,1-1.041-.5l-4.267-5.333a1.333,1.333,0,0,1,0-1.665l4.267-5.333a1.331,1.331,0,0,1,1.041-.5h3.359L14,15.333Z" transform="translate(-22382.334 0.666)" fill="#5d718d"/>
+  </g>
+=======
+<svg id="back" xmlns="http://www.w3.org/2000/svg" width="31.984" height="31.984" viewBox="0 0 31.984 31.984">
+  <g id="Rectangle_16533" data-name="Rectangle 16533" fill="#fff" stroke="#707070" stroke-width="1" opacity="0">
+    <rect width="31.984" height="31.984" stroke="none"/>
+    <rect x="0.5" y="0.5" width="30.984" height="30.984" fill="none"/>
+  </g>
+  <path id="icons8_back_to_1" d="M15.327,2A13.327,13.327,0,1,0,28.654,15.327,13.327,13.327,0,0,0,15.327,2Zm4,19.99H15.968a1.334,1.334,0,0,1-1.041-.5L10.662,16.16a1.333,1.333,0,0,1,0-1.665l4.265-5.331a1.331,1.331,0,0,1,1.041-.5h3.357l-5.331,6.663Z" transform="translate(0.665 0.665)" fill="#5d718d"/>
+>>>>>>> Hassan
+</svg>

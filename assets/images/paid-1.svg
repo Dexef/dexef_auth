@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="240" height="240" viewBox="0 0 240 240">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_18148" data-name="Rectangle 18148" width="240" height="240" rx="8" fill="#2e8b57" opacity="0.1"/>
+    </clipPath>
+  </defs>
+  <g id="paid" clip-path="url(#clip-path)">
+    <g id="Group_232651" data-name="Group 232651" transform="translate(240 -8.848) rotate(135)">
+      <rect id="Rectangle_18147" data-name="Rectangle 18147" width="350" height="69" rx="8" transform="translate(-0.452 0.059)" fill="#4b4e6d"/>
+      <text id="Content_signup" transform="translate(216.048 19.724) rotate(180)" fill="#fff" font-size="37" font-family="SegoeUI-Bold, Segoe UI" font-weight="700"><tspan x="0" y="0">مُلغاة</tspan></text>
+    </g>
+  </g>
+</svg>

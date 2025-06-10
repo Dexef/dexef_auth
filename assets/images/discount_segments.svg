@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="81" height="81" viewBox="0 0 81 81">
+  <defs>
+    <filter id="Rectangle_950" x="0" y="0" width="81" height="81" filterUnits="userSpaceOnUse">
+      <feOffset dx="6" dy="6" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="7.5" result="blur"/>
+      <feFlood flood-color="#4b4e6d" flood-opacity="0.161"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="discount_segments" transform="translate(-176.5 -1166.5)">
+    <g transform="matrix(1, 0, 0, 1, 176.5, 1166.5)" filter="url(#Rectangle_950)">
+      <rect id="Rectangle_950-2" data-name="Rectangle 950" width="36" height="36" rx="4" transform="translate(16.5 16.5)" fill="#92a1b6"/>
+    </g>
+    <path id="icons8_Sale_Price_Tag" d="M13.575,3a2.1,2.1,0,0,0-1.486.615c-2.147,2.147-9.2,9.2-9.468,9.479a2.078,2.078,0,0,0,0,2.968c.958.968,5.073,5.084,6.315,6.315a2.078,2.078,0,0,0,2.968,0c.277-.267,7.332-7.321,9.479-9.468A2.1,2.1,0,0,0,22,11.421V5.1a2.1,2.1,0,0,0-2.1-2.1ZM12.009,8.262a1.573,1.573,0,1,1-1.579,1.568A1.572,1.572,0,0,1,12.009,8.262ZM10.936,18.787a1.573,1.573,0,1,1,1.579-1.568A1.572,1.572,0,0,1,10.936,18.787Zm3.694-4.21H8.315a1.053,1.053,0,0,1-1.052-1.052h0a1.053,1.053,0,0,1,1.052-1.052H14.63a1.053,1.053,0,0,1,1.052,1.052h0A1.053,1.053,0,0,1,14.63,14.577Zm3.684-6.315a1.579,1.579,0,1,1,1.579-1.579A1.577,1.577,0,0,1,18.314,8.262Z" transform="translate(199.002 1188)" fill="#fff"/>
+  </g>
+</svg>

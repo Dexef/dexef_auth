@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "585255872109",
+    "project_id": "mydexef",
+    "storage_bucket": "mydexef.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:585255872109:android:58d438fcaea62e0dc5c164",
+        "android_client_info": {
+          "package_name": "com.dexef.mydexef"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "585255872109-rltq7iah1ro4g7p3tkng8pjmc4u6inhb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dexef.mydexef",
+            "certificate_hash": "4d87ceba9d785d5f4e1570a1f40b912fbc8dc682"
+          }
+        },
+        {
+          "client_id": "585255872109-ltgp15tmg6ptjm08h3vg5o93ss0gukn6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRYba9-ZswhGFwujFaFo8H0TFC2xwa6Gc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "585255872109-ltgp15tmg6ptjm08h3vg5o93ss0gukn6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "585255872109-2nm4svjmguc89ftue5gv7urfd59cj149.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dexef.mydexef"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:585255872109:android:05f3cfd00dd0c49ec5c164",
+        "android_client_info": {
+          "package_name": "com.example.auth_dexef"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "585255872109-ltgp15tmg6ptjm08h3vg5o93ss0gukn6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRYba9-ZswhGFwujFaFo8H0TFC2xwa6Gc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "585255872109-ltgp15tmg6ptjm08h3vg5o93ss0gukn6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "585255872109-2nm4svjmguc89ftue5gv7urfd59cj149.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dexef.mydexef"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

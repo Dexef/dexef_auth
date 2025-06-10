@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="81" height="81" viewBox="0 0 81 81">
+  <defs>
+    <filter id="Rectangle_950" x="0" y="0" width="81" height="81" filterUnits="userSpaceOnUse">
+      <feOffset dx="6" dy="6" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="7.5" result="blur"/>
+      <feFlood flood-color="#4b4e6d" flood-opacity="0.161"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="barcode_printing" transform="translate(-176.5 -1166.5)">
+    <g transform="matrix(1, 0, 0, 1, 176.5, 1166.5)" filter="url(#Rectangle_950)">
+      <rect id="Rectangle_950-2" data-name="Rectangle 950" width="36" height="36" rx="4" transform="translate(16.5 16.5)" fill="#274268"/>
+    </g>
+    <path id="icons8_barcode_reader_2" d="M4.717,3A1.717,1.717,0,0,0,3,4.717c0,.144.885,3.451.885,3.451a1.76,1.76,0,0,0,1.691,1.5h8.856a1.111,1.111,0,0,1,1.087.888L16.134,13h.2a1.111,1.111,0,0,0,0,2.222h.258l.525,2.541a25.368,25.368,0,0,0-.786,3.418,1.813,1.813,0,0,0,1.634,1.8l.028.02h3.188A1.819,1.819,0,0,0,23,21.181c0-.193-1.948-10.314-2.049-10.938a2.553,2.553,0,0,1,1.157-2.329A1.691,1.691,0,0,0,23,6.435V4.717A1.717,1.717,0,0,0,21.283,3ZM3.556,16.333A.557.557,0,0,0,3,16.889v5.556a.556.556,0,0,0,1.111,0V16.889A.557.557,0,0,0,3.556,16.333Zm2.222,0a.557.557,0,0,0-.556.556v5.556a.556.556,0,0,0,1.111,0V16.889A.557.557,0,0,0,5.778,16.333Zm2.778,0a1.112,1.112,0,0,0-1.111,1.111v4.444a1.111,1.111,0,0,0,2.222,0V17.444A1.112,1.112,0,0,0,8.556,16.333Zm2.778,0a.557.557,0,0,0-.556.556v5.556a.556.556,0,0,0,1.111,0V16.889A.557.557,0,0,0,11.333,16.333Z" transform="translate(198 1188)" fill="#fff"/>
+  </g>
+</svg>

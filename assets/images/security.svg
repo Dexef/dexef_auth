@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <g id="security" transform="translate(4382)">
+    <rect id="Rectangle_16412" data-name="Rectangle 16412" width="24" height="24" rx="4" transform="translate(-4382)" fill="#5d718d" opacity="0"/>
+    <path id="icons8_protect" d="M10.364,1,3,4.273V9.182A10.161,10.161,0,0,0,10.364,19a10.161,10.161,0,0,0,7.364-9.818V4.273Zm0,1.791,5.727,2.546V9.182a8.642,8.642,0,0,1-5.727,8.131A8.642,8.642,0,0,1,4.636,9.182V5.337Zm3.922,3.768L9.545,11.3,7.278,9.03,6.121,10.187l3.425,3.425,5.9-5.9Z" transform="translate(-4380 2)" fill="#5d718d"/>
+  </g>
+</svg>

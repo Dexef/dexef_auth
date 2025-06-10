@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="81" height="81" viewBox="0 0 81 81">
+  <defs>
+    <filter id="Rectangle_950" x="0" y="0" width="81" height="81" filterUnits="userSpaceOnUse">
+      <feOffset dx="6" dy="6" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="7.5" result="blur"/>
+      <feFlood flood-color="#4b4e6d" flood-opacity="0.161"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="purchase_invoice" transform="translate(-176.5 -1166.5)">
+    <g transform="matrix(1, 0, 0, 1, 176.5, 1166.5)" filter="url(#Rectangle_950)">
+      <rect id="Rectangle_950-2" data-name="Rectangle 950" width="36" height="36" rx="4" transform="translate(16.5 16.5)" fill="#ff8000"/>
+    </g>
+    <path id="icons8_purchase_order" d="M5.158,3A1.053,1.053,0,0,0,4.105,4.053v9.474a1.053,1.053,0,1,0,2.105,0V5.105H19.895V18.789a1.036,1.036,0,0,1-1.053,1.053,1.054,1.054,0,0,1-1.053-1.053V17.737a1.053,1.053,0,0,0-1.053-1.053H3.053A1.053,1.053,0,0,0,2,17.737v1.053a3.158,3.158,0,0,0,3.158,3.158H18.842A3.174,3.174,0,0,0,22,18.789V4.053A1.053,1.053,0,0,0,20.947,3ZM8.842,8.263a.527.527,0,0,0-.526.526V9.842a.527.527,0,0,0,.526.526H9.895a.527.527,0,0,0,.526-.526V8.789a.527.527,0,0,0-.526-.526Zm4.737,0a1.053,1.053,0,0,0,0,2.105h3.158a1.053,1.053,0,0,0,0-2.105ZM8.842,12.474A.527.527,0,0,0,8.316,13v1.053a.527.527,0,0,0,.526.526H9.895a.527.527,0,0,0,.526-.526V13a.527.527,0,0,0-.526-.526Zm4.737,0a1.053,1.053,0,0,0,0,2.105h3.158a1.053,1.053,0,0,0,0-2.105Z" transform="translate(199 1189)" fill="#f9f9f9"/>
+  </g>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <g id="notification" transform="translate(1105 7097)">
+    <rect id="Rectangle_16473" data-name="Rectangle 16473" width="30" height="30" rx="4" transform="translate(-1105 -7097)" fill="#fff" opacity="0"/>
+    <path id="icons8_notification" d="M12,2a1.5,1.5,0,0,0-1.5,1.5v.7A6,6,0,0,0,6,10v6L4,18v1h6.269a2,2,0,1,0,3.459,0H20V18l-2-2V10a6,6,0,0,0-4.5-5.8V3.5A1.5,1.5,0,0,0,12,2Zm0,4a4,4,0,0,1,4,4v6.828l.172.172H7.828L8,16.828V10A4,4,0,0,1,12,6Z" transform="translate(-1102 -7094)" fill="#5d718d"/>
+  </g>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <g id="upload_image" transform="translate(0 13340)">
+    <g id="Rectangle_17929" data-name="Rectangle 17929" transform="translate(0 -13340)" fill="#fff" stroke="#707070" stroke-width="1" opacity="0">
+      <rect width="40" height="40" stroke="none"/>
+      <rect x="0.5" y="0.5" width="39" height="39" fill="none"/>
+    </g>
+    <path id="icons8-upload_to_cloud" d="M31.174,11.34A11.653,11.653,0,0,0,10.43,8.008,10.847,10.847,0,0,0,.11,20.4a11.072,11.072,0,0,0,11.08,9.27h7.143v-10H14.725a.7.7,0,0,1-.492-1.187L19.508,13.2a.7.7,0,0,1,.983,0l5.275,5.275a.7.7,0,0,1-.492,1.187H21.666v10h8.776a9.434,9.434,0,0,0,9.5-8.126A9.178,9.178,0,0,0,31.174,11.34Z" transform="translate(0 -13336.333)" fill="#5d718d"/>
+  </g>
+</svg>

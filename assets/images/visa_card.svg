@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="81" height="81" viewBox="0 0 81 81">
+  <defs>
+    <filter id="Rectangle_950" x="0" y="0" width="81" height="81" filterUnits="userSpaceOnUse">
+      <feOffset dx="6" dy="6" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="7.5" result="blur"/>
+      <feFlood flood-color="#4b4e6d" flood-opacity="0.161"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="visa_card" transform="translate(-158.5 -1166.5)">
+    <g transform="matrix(1, 0, 0, 1, 158.5, 1166.5)" filter="url(#Rectangle_950)">
+      <rect id="Rectangle_950-2" data-name="Rectangle 950" width="36" height="36" rx="4" transform="translate(16.5 16.5)" fill="#0075f4"/>
+    </g>
+    <path id="icons8_visa" d="M4,4A2,2,0,0,0,2,6V18a2,2,0,0,0,2,2H20a2,2,0,0,0,2-2V6a2,2,0,0,0-2-2ZM14.389,9a4.083,4.083,0,0,1,1.344.311l-.311,1.24a1.972,1.972,0,0,0-1.033-.414c-.723,0-.93.311-.93.621,0,.723,2.066.825,2.066,2.271a2.249,2.249,0,0,1-2.377,1.961,3.225,3.225,0,0,1-1.549-.309l.207-1.24a3.539,3.539,0,0,0,1.445.311c.826,0,.93-.312.93-.518,0-.93-2.066-.62-2.066-2.478C12.115,9.826,12.839,9,14.389,9Zm-6.508.1H9.326l-2.17,5.785H5.607L4.471,10.24a5.315,5.315,0,0,1,1.963,2.479,2.106,2.106,0,0,0,.1.518Zm10.02,0h1.549l1.137,5.785h-1.24l-.207-.826H17.279l-.309.826H15.523Zm-7.955.1h1.549l-.93,5.785H9.119Zm-7.23,0H4.988a.889.889,0,0,1,.826.516L6.33,12.3C5.71,10.136,2.715,9.207,2.715,9.207Zm15.7,1.652-.826,2.17h1.238Z" transform="translate(181 1189)" fill="#fff"/>
+  </g>
+</svg>

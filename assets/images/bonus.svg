@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="81" height="81" viewBox="0 0 81 81">
+  <defs>
+    <filter id="Rectangle_950" x="0" y="0" width="81" height="81" filterUnits="userSpaceOnUse">
+      <feOffset dx="6" dy="6" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="7.5" result="blur"/>
+      <feFlood flood-color="#4b4e6d" flood-opacity="0.161"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="bonus" transform="translate(-176.5 -1166.5)">
+    <g transform="matrix(1, 0, 0, 1, 176.5, 1166.5)" filter="url(#Rectangle_950)">
+      <rect id="Rectangle_950-2" data-name="Rectangle 950" width="36" height="36" rx="4" transform="translate(16.5 16.5)" fill="#ff8000"/>
+    </g>
+    <path id="icons8_get_cash_1" d="M16.221,3a4.757,4.757,0,1,0,4.757,4.757A4.757,4.757,0,0,0,16.221,3Zm.643,2.191h.262v4.42a.7.7,0,1,1-1.4,0V6.74l-.565.217a.5.5,0,0,1-.366-.922ZM5.757,10.61a2.854,2.854,0,0,0-.87.139L1,11.664v6.851L4.805,17.27l7.759,2.715a2.351,2.351,0,0,0,1.884-.145l5.832-3.118a1.362,1.362,0,0,0-1.21-2.44l-5.622,2.579-.355-.465.281-.622a1.9,1.9,0,0,0-.975-2.523L6.927,10.865l-.1-.045a2.854,2.854,0,0,0-1.07-.21Z" transform="translate(200 1189)" fill="#fff"/>
+  </g>
+</svg>

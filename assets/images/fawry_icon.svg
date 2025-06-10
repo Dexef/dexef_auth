@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+  <g id="Group_58149" data-name="Group 58149" transform="translate(-667)">
+    <rect id="Rectangle_16419" data-name="Rectangle 16419" width="20" height="20" rx="2" transform="translate(667)" fill="#fff" opacity="0"/>
+    <g id="icons8_Magnetic_Card_3" transform="translate(669 5)">
+      <path id="Path_70813" data-name="Path 70813" d="M19,18.9a1.524,1.524,0,0,1-1.524,1.524H4.524A1.524,1.524,0,0,1,3,18.9V10.524A1.524,1.524,0,0,1,4.524,9H17.476A1.524,1.524,0,0,1,19,10.524Z" transform="translate(-3 -9)" fill="#64b5f6"/>
+      <path id="Path_70814" data-name="Path 70814" d="M3,14H19v2.286H3Z" transform="translate(-3 -12.095)" fill="#37474f"/>
+      <path id="Path_70815" data-name="Path 70815" d="M5,22H19.476v1.9H5Z" transform="translate(-4.238 -17.048)" fill="#e3f2fd"/>
+    </g>
+  </g>
+</svg>

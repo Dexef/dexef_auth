@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="36" viewBox="0 0 64 36">
+  <g id="primary" transform="translate(-842)">
+    <g id="Rectangle_16465" data-name="Rectangle 16465" transform="translate(842)" fill="none" stroke="#d2d9e0" stroke-width="1">
+      <rect width="64" height="36" rx="4" stroke="none"/>
+      <rect x="0.5" y="0.5" width="63" height="35" rx="3.5" fill="none"/>
+    </g>
+    <g id="icons8_mastercard_logo" transform="translate(859 8)">
+      <path id="Path_72958" data-name="Path 72958" d="M27.864,10a9.864,9.864,0,1,0,9.864,9.864A9.864,9.864,0,0,0,27.864,10Z" transform="translate(-6.727 -10)" fill="#ff9800"/>
+      <path id="Path_72959" data-name="Path 72959" d="M11.864,10a9.864,9.864,0,1,0,9.864,9.864A9.864,9.864,0,0,0,11.864,10Z" transform="translate(-2 -10)" fill="#d50000"/>
+      <path id="Path_72960" data-name="Path 72960" d="M18,20.608A9.846,9.846,0,0,0,22.227,28.7a9.851,9.851,0,0,0,0-16.176A9.846,9.846,0,0,0,18,20.608Z" transform="translate(-6.727 -10.745)" fill="#ff3d00"/>
+    </g>
+  </g>
+</svg>
