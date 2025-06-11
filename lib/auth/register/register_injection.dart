@@ -21,7 +21,7 @@ import 'domain/useCase/sign_up_use_case.dart';
 import 'domain/useCase/verify_code_use_case.dart';
 
 registerInjection(){
-  locator.registerFactory(() => SignUpCubit(locator(), locator(), locator()));
+  locator.registerFactory(() => SignUpCubit(locator(), locator(), locator(), locator()));
 
 //////////////////////////////////////////////////////////////////////////////// data source
   locator.registerLazySingleton<ChangePhoneNumberDataSource>(() => ChangePhoneNumberDataSource());

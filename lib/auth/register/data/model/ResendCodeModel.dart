@@ -1,4 +1,6 @@
 
+import 'package:auth_dexef/core/rest/error_model.dart';
+
 import '../../domain/entity/resend_code_entity.dart';
 
 /// isSuccess : true
@@ -8,7 +10,7 @@ import '../../domain/entity/resend_code_entity.dart';
 class ResendCodeModel extends ResendCodeEntity{
   ResendCodeModel({
       bool? isSuccess, 
-      List<dynamic>? errors, 
+      List<Errors>? errors,
       ResendCodeData? data,}){
     _isSuccess = isSuccess;
     _errors = errors;
@@ -26,11 +28,11 @@ class ResendCodeModel extends ResendCodeEntity{
     _data = json['data'] != null ? ResendCodeData.fromJson(json['data']) : null;
   }
   bool? _isSuccess;
-  List<dynamic>? _errors;
+  List<Errors>? _errors;
   ResendCodeData? _data;
 
   bool? get isSuccess => _isSuccess;
-  List<dynamic>? get errors => _errors;
+  List<Errors>? get errors => _errors;
   ResendCodeData? get data => _data;
 
   Map<String, dynamic> toJson() {

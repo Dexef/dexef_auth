@@ -9,34 +9,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:mydexef/main.dart';
-import '../../../../../core/class_constants/Routes.dart';
-import '../../../../../core/arguments.dart';
-import '../../../../../core/class_constants/constants_methods.dart';
-import '../../../../../core/firebase_authentication.dart';
+import 'package:intl_phone_field/phone_number.dart';
 import '../../../../../core/size_widgets/app_screen_size.dart';
-import '../../../../../core/widgets/alert_dialog.dart';
-import '../../../../../core/widgets/custom_round_button.dart';
-import '../../../../../core/widgets/custom_text_field.dart';
 import '../../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../../core/widgets/default_login_screen.dart';
-import '../../../../../core/widgets/default_text.dart';
-import '../../../../../core/widgets/password_text_field.dart';
 import '../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../style/colors/colors.dart';
-import '../../../../../utils/app_localizations.dart';
-import '../../../../../utils/cash_helper.dart';
-import '../../../../../utils/constants.dart';
-import '../../../../../utils/regex.dart';
+import '../../../../core/rest/app_localizations.dart';
+import '../../../../core/rest/cash_helper.dart';
+import '../../../../core/rest/constants.dart';
+import '../../../../core/rest/methods.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/public/default_login_screen.dart';
+import '../../../../core/widgets/public/default_text.dart';
 import '../../data/model/SignUpModel.dart';
 import '../cubit/sign_up_cubit.dart';
-import 'package:mydexef/locator.dart' as di;
-import '../../../presentation/cubit/sign_up_cubit/sign_up_states.dart';
+
 import 'package:intl_phone_field/countries.dart';
 import 'dart:ui' as ui;
 
 import '../../../../core/rest/sign_up_errors_values.dart';
+import '../cubit/sign_up_states.dart';
 
 class AdminSignUp extends StatefulWidget {
   const AdminSignUp({Key? key}) : super(key: key);
@@ -116,7 +107,7 @@ class _AdminSignUpState extends State<AdminSignUp> {
     return BlocConsumer<SignUpCubit, SignUpStates>(
       builder: (context, state) {
         signUpCubit = SignUpCubit.get(context);
-        number  = PhoneNumber(isoCode: signUpCubit?.userCountryCode ??'EG');
+        number  = PhoneNumber(countryISOCode: signUpCubit?.userCountryCode ??'EG', countryCode: '', number: '');
         // credFaceWeb = signUpCubit!.credFaceWeb;
         return DefaultLoginScreen(
           isLoading: state is LoadingState,
