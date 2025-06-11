@@ -20,7 +20,6 @@ export 'dexef_auth/login/domain/useCase/validate_email_use_case.dart';
 export 'dexef_auth/login/presentation/cubit/login_cubit.dart';
 export 'dexef_auth/login/presentation/cubit/login_states.dart';
 export 'dexef_auth/login/presentation/pages/login_page.dart';
-export 'dexef_auth/login/presentation/pages/dexef_login.dart';
 export 'dexef_auth/main_scaffold/main_scaffold_page.dart';
 export 'dexef_auth/main_scaffold/menu_item.dart';
 export 'dexef_auth/main_scaffold/search_controller.dart';

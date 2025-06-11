@@ -1,4 +1,3 @@
-import 'package:auth_dexef/dexef_auth/login/presentation/cubit/login_cubit.dart';
 import 'package:auth_dexef/redirect.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,6 @@ import 'core/rest/custom_scroll_behavior.dart';
 import 'core/rest/my_navigator_observer.dart';
 import 'core/rest/routes.dart';
 import 'core/theme/light_theme.dart';
-import 'dexef_auth/main_scaffold/main_scaffold_page.dart';
 import 'main.dart';
 import 'package:auth_dexef/locator.dart' as di;
 
