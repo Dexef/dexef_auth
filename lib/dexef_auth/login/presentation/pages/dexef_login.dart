@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TestAuth extends StatelessWidget {
-  const TestAuth({super.key});
+class DexefLogin extends StatelessWidget {
+  const DexefLogin({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
