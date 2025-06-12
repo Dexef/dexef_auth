@@ -12,6 +12,7 @@ import 'core/rest/custom_scroll_behavior.dart';
 import 'core/rest/my_navigator_observer.dart';
 import 'core/rest/routes.dart';
 import 'core/theme/light_theme.dart';
+import 'features/login/presentation/cubit/login_cubit.dart';
 import 'main.dart';
 import 'package:auth_dexef/locator.dart' as di;
 

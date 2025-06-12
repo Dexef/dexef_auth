@@ -87,6 +87,16 @@ bool isLogged() {
   return false;
 }
 ////////////////////////////////////////////////////////////////////////////////
+getErrorMessage(String apiMessage){
+  if(apiMessage == "Failed : This mobile is not verified"){
+    return 'The mobile is not verified';
+  }else if(apiMessage == "Failed : {0} Not Found"){
+    return "Please, sign up first";
+  }else{
+    return apiMessage;
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
 
 
 
