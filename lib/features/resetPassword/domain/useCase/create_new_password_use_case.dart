@@ -1,7 +1,7 @@
-import 'package:auth_dexef/auth/resetPassword/domain/repo/resetPassword_repo.dart';
 import 'package:dartz/dartz.dart';
 import '../../../../core/rest/failure.dart';
 import '../entity/create_new_password_entity.dart';
+import '../repo/resetPassword_repo.dart';
 
 class CreateNewPasswordUseCase {
   final ResetPasswordRepository resetPasswordRepository;

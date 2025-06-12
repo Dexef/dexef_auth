@@ -1,11 +1,11 @@
-import 'package:auth_dexef/auth/register/domain/entity/resend_code_entity.dart';
-import 'package:auth_dexef/auth/resetPassword/domain/entity/create_new_password_entity.dart';
-import 'package:auth_dexef/auth/resetPassword/domain/entity/reset_password_entity.dart';
-import 'package:auth_dexef/auth/resetPassword/domain/entity/verify_forget_password_entity.dart';
-import 'package:auth_dexef/auth/resetPassword/domain/repo/resetPassword_repo.dart';
 import 'package:auth_dexef/core/rest/failure.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import '../../../register/domain/entity/resend_code_entity.dart';
+import '../../domain/entity/create_new_password_entity.dart';
+import '../../domain/entity/reset_password_entity.dart';
+import '../../domain/entity/verify_forget_password_entity.dart';
+import '../../domain/repo/resetPassword_repo.dart';
 import '../data_source/create_new_password_data_source.dart';
 import '../data_source/resend_forget_pass_verify_code_data_source.dart';
 import '../data_source/reset_password_data_source.dart';

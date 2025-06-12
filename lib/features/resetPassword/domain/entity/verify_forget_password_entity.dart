@@ -1,20 +1,17 @@
-import '../../data/model/VerifyForgetPasswordModel.dart';
+import 'package:auth_dexef/core/rest/error_model.dart';
+import 'package:equatable/equatable.dart';
 
-class VerifyForgetPasswordEntity{
+class VerifyForgetPasswordEntity extends Equatable{
   VerifyForgetPasswordEntity({
-    bool? isSuccess,
-    List<VerifyForgetPasswordErrors>? errors,
-    bool? data,}){
-    _isSuccess = isSuccess;
-    _errors = errors;
-    _data = data;
-  }
+    this.isSuccess,
+    this.errors,
+    this.data
+  });
 
-  bool? _isSuccess;
-  List<VerifyForgetPasswordErrors>? _errors;
-  bool? _data;
+  bool? isSuccess;
+  List<Errors>? errors;
+  bool? data;
 
-  bool? get isSuccess => _isSuccess;
-  List<VerifyForgetPasswordErrors>? get errors => _errors;
-  bool? get data => _data;
+  @override
+  List<Object?> get props => [isSuccess , errors, data];
 }

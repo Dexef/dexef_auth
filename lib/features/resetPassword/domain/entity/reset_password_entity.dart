@@ -1,27 +1,20 @@
-
+import 'package:auth_dexef/core/rest/error_model.dart';
+import 'package:equatable/equatable.dart';
 import '../../data/model/ResetPasswordModel.dart';
 
-
-class ResetPasswordEntity {
+class ResetPasswordEntity extends Equatable{
   ResetPasswordEntity({
-    bool? isSuccess,
-    List<ResetPasswordErrors>? errors,
-    ResetPasswordData? data,}){
+    this.isSuccess,
+    this.errors,
+    this.data
+  });
 
-    _isSuccess = isSuccess;
-    _errors = errors;
-    _data = data;
-  }
+  bool? isSuccess;
+  List<Errors>? errors;
+  ResetPasswordData? data;
 
-  bool? _isSuccess;
-  List<ResetPasswordErrors>? _errors;
-  ResetPasswordData? _data;
-
-  bool? get isSuccess => _isSuccess;
-  List<ResetPasswordErrors>? get errors => _errors;
-  ResetPasswordData? get data => _data;
-
-
+  @override
+  List<Object?> get props => [isSuccess , errors, data];
 }
 
 
