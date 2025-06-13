@@ -43,7 +43,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  LoginCubit? loginCubit;
+  late LoginCubit loginCubit;
   bool isTap = false;
   final formKey = GlobalKey<FormState>();
   TextEditingController phoneController = TextEditingController();
@@ -71,9 +71,9 @@ class _LoginScreenState extends State<LoginScreen> {
 ////////////////////////////////////////////////////////////////////////////////
   @override
   void initState() {
-    phoneOrEmail = loginCubit?.socialLogin == AppConstants.googleString
-      ? loginCubit!.credGoogleWeb!.user!.email! : loginCubit?.socialLogin == AppConstants.appleString
-      ? loginCubit!.appleEmail!
+    phoneOrEmail = LoginCubit.instance.loginType == AppConstants.googleString
+      ? LoginCubit.instance.credGoogleWeb!.user!.email! : LoginCubit.instance.loginType == AppConstants.appleString
+      ? LoginCubit.instance.appleCredential?.user?.email!
       : phoneController.text;
     checkRememberMe();
     _updateImagePath();
@@ -81,9 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 ////////////////////////////////////////////////////////////////////////////////
   void _updateImagePath() {
-    imagePath = loginCubit?.validateEmailEntity?.data?.type == null
+    imagePath = LoginCubit.instance.loginType == null
       ? 'images/login_first.png'
-      : loginCubit?.validateEmailEntity?.data?.type == AppConstants.normalString
+      : LoginCubit.instance.loginType == AppConstants.normalString
       ? 'images/login_password.png'
       : 'images/login_email.png';
   }
@@ -92,19 +92,18 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<LoginCubit, LoginState>(
       listener: (context, state) {
-        getListenerForValidate(state);
-        getListenerForGoogle(loginCubit!, state);
-        getListenerForNormalDesign(loginCubit!, state);
-        getListenerForApple(loginCubit!, state);
+        getListenerForValidate(LoginCubit.instance,state);
+        getListenerForGoogle(LoginCubit.instance, state);
+        getListenerForNormalDesign(LoginCubit.instance, state);
+        getListenerForApple(LoginCubit.instance, state);
       },
       builder: (context, state) {
-        loginCubit = LoginCubit.get(context);
-        // loginCubit?.getEmailType();
-        debugPrint("emailType ${loginCubit?.loginType}");
+        loginCubit = LoginCubit.instance;
+        debugPrint("emailType ${loginCubit.loginType}");
         return AbsorbPointer(
-          absorbing: state is LoginLoading || state is GettingDialCode || state is ValidateEmailLoading,
+          absorbing: loginCubit.isLoading,
           child: DefaultLoginScreen(
-            isLoading: loginCubit?.isLoading,
+            isLoading: loginCubit.isLoading,
             body: state is GetIPForCountryLoading ? const SizedBox() : state is GetIPForCountryError || state is GetIPForCountryFailure
                 ? const NetworkFailed() : desktopLogin(state, phoneOrEmail!),
           ),
@@ -153,90 +152,74 @@ class _LoginScreenState extends State<LoginScreen> {
                                     align: TextAlign.start,
                                   ),
                                   getLanguageCode(context) == 'en' ? const SizedBox(height: 14,) : const SizedBox(height: 10,),
-
-                                  (loginCubit?.loginType == AppConstants.googleString ||
-                                      loginCubit?.loginType == AppConstants.appleString) &&
-                                      loginCubit?.modifyDataFromPassword ==
-                                          false
-                                      ? PreviousSignSocialWidget(
-                                    state: state,
-                                    emailType: loginCubit?.loginType ?? "",
-                                    loginCubit: loginCubit!,
-                                    phoneText: phoneController.text,
-                                  ) :
-                                  loginCubit?.loginType ==
-                                      AppConstants.normalString &&
-                                      loginCubit?.modifyDataFromPassword ==
-                                          false
-                                  // state is ValidateEmailSuccess &&  emailType == AppConstants.normalString &&loginCubit?.modifyDataFromPassword == false
-                                      ? PasswordLoginWidget(
-                                    loginCubit: loginCubit!,
-                                    state: state,
-                                    formKey: formKey,
-                                    passwordController: passwordController,
-                                    passwordFocusNode: passwordFocusNode,
-                                    phoneOrEmail: phoneOrEmail,
-                                    rememberMeChecker: rememberMeChecker,
-                                  ):loginCubit?.loginType == AppConstants.normalString ? Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const HaveAccountWidget(),
-                                      const SizedBox(height: 44),
-                                      loginCubit?.validateEmailEntity?.data == null || loginCubit?.modifyDataFromPassword == true ? EmailLoginWidget(
-                                        phoneOrEmail: phoneController,
-                                        formKey: formKey,
-                                        state: state,
-                                        loginCubit: loginCubit!,
-                                        emailFocusNode: emailFocusNode,
-                                        // countriesList: countries,
-                                      ) : loginCubit?.loginType ==
-                                          AppConstants.normalString
-                                          ? PasswordLoginWidget(
-                                        loginCubit: loginCubit!,
-                                        state: state,
-                                        formKey: formKey,
-                                        passwordController: passwordController,
-                                        passwordFocusNode: passwordFocusNode,
-                                        phoneOrEmail: phoneOrEmail,
-                                        rememberMeChecker: rememberMeChecker,
-                                      ) : loginCubit?.loginType == null
-                                          ? EmailLoginWidget(
-                                        phoneOrEmail: phoneController,
-                                        formKey: formKey,
-                                        state: state,
-                                        loginCubit: loginCubit!,
-                                        emailFocusNode: emailFocusNode,
-                                        // countriesList: countries,
-                                      )
-                                          : const SizedBox(),
-                                      const SizedBox(height: 20),
-                                      Center(
-                                        child: DefaultText(
-                                            text: AppLocalizations.of(context)!
-                                                .translate('or'),
-                                            isTextTheme: true,
-                                            themeStyle: Theme
-                                                .of(context)
-                                                .textTheme
-                                                .labelSmall
-                                                ?.copyWith(
-                                              fontWeight: FontWeight.w400,
-                                              color: brushIcon,
-                                              fontFamily: 'DXRound',
-                                            )
+                                  Visibility(
+                                    visible: loginCubit.loginType == AppConstants.googleString
+                                        || loginCubit.loginType == AppConstants.appleString,
+                                    child: PreviousSignSocialWidget(
+                                      state: state,
+                                      emailType: loginCubit.loginType ?? "",
+                                      loginCubit: loginCubit,
+                                      phoneText: phoneController.text,
+                                    ),
+                                  ),
+                                  Visibility(
+                                    visible: loginCubit.loginType == AppConstants.normalString && loginCubit.writePassword == true,
+                                    child: PasswordLoginWidget(
+                                      loginCubit: loginCubit,
+                                      state: state,
+                                      formKey: formKey,
+                                      passwordController: passwordController,
+                                      passwordFocusNode: passwordFocusNode,
+                                      phoneOrEmail: phoneOrEmail,
+                                      rememberMeChecker: rememberMeChecker,
+                                    ),
+                                  ),
+                                  Visibility(
+                                    visible: loginCubit.loginType == null,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const HaveAccountWidget(),
+                                        const SizedBox(height: 44),
+                                        loginCubit.writePassword == false ? EmailLoginWidget(
+                                          phoneOrEmail: phoneController,
+                                          formKey: formKey,
+                                          state: state,
+                                          loginCubit: loginCubit,
+                                          emailFocusNode: emailFocusNode,
+                                        ): PasswordLoginWidget(
+                                          loginCubit: loginCubit,
+                                          state: state,
+                                          formKey: formKey,
+                                          passwordController: passwordController,
+                                          passwordFocusNode: passwordFocusNode,
+                                          phoneOrEmail: phoneOrEmail,
+                                          rememberMeChecker: rememberMeChecker,
                                         ),
-                                      ),
-                                      const SizedBox(height: 20),
-                                      SocialButtonWidget(
-                                        loginCubit: loginCubit!,
-                                        state: state,
-                                      ),
-                                    ],
-                                  ) : PreviousSignSocialWidget(
-                                    state: state,
-                                    emailType: loginCubit?.loginType ?? "",
-                                    loginCubit: loginCubit!,
-                                    phoneText: phoneController.text,
+                                        const SizedBox(height: 20),
+                                        Center(
+                                          child: DefaultText(
+                                              text: AppLocalizations.of(context)!
+                                                  .translate('or'),
+                                              isTextTheme: true,
+                                              themeStyle: Theme
+                                                  .of(context)
+                                                  .textTheme
+                                                  .labelSmall
+                                                  ?.copyWith(
+                                                fontWeight: FontWeight.w400,
+                                                color: brushIcon,
+                                                fontFamily: 'DXRound',
+                                              )
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        SocialButtonWidget(
+                                          loginCubit: loginCubit!,
+                                          state: state,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -265,9 +248,9 @@ class _LoginScreenState extends State<LoginScreen> {
     } else if (state is LoginWithGoogleError) {
       loginCubit.validateEmailNormal(loginCubit.credGoogleWeb!.user!.email!);
     } else if (state is ValidateEmailError) {
-      if (loginCubit.socialLogin == 'Google') {
+      if (loginCubit.loginType == AppConstants.googleString) {
         loginCubit.signInWithGoogleWeb(false);
-      } else if (loginCubit.socialLogin == 'apple') {
+      } else if (loginCubit.loginType == AppConstants.appleString) {
         // loginCubit.signUpWithApple();
         CacheHelper.saveData(
           key: Constants.appleToken.toString(),
@@ -332,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else if (state is LoginWithAppleSuccess) {
       CacheHelper.saveData(key: Constants.isLoggedFromApple.toString(), value: true);
     } else if (state is LoginWithAppleError) {
-      loginCubit.validateEmailNormal(loginCubit.appleEmail!);
+      loginCubit.validateEmailNormal(loginCubit.appleCredential!.user!.email!);
     }
   }
 ////////////////////////////////////////////////////////////////////////////////
@@ -356,14 +339,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 ////////////////////////////////////////////////////////////////////////////////
-  getListenerForValidate(LoginState state){
+  getListenerForValidate(LoginCubit loginCubit, LoginState state){
     if (state is ValidateEmailSuccess) {
       if(state.validateEmailEntity?.data?.customerStatus == null){
-        loginCubit?.loginType = loginCubit?.validateEmailEntity?.data?.type ?? CacheHelper.getData(key: Constants.emailType.toString());
-        phoneOrEmail = loginCubit?.socialLogin == AppConstants.googleString
-            ? loginCubit!.credGoogleWeb!.user!.email!
-            : loginCubit?.socialLogin == AppConstants.appleString
-            ? loginCubit!.appleEmail! : phoneController.text;
+        loginCubit.loginType = loginCubit.validateEmailEntity?.data?.type ?? CacheHelper.getData(key: Constants.emailType.toString());
+        phoneOrEmail = loginCubit.loginType == AppConstants.googleString
+            ? loginCubit.credGoogleWeb!.user!.email!
+            : loginCubit.loginType == AppConstants.appleString
+            ? loginCubit.appleCredential!.user!.email : phoneController.text;
         _updateImagePath();
       }else{
         Router.neglect(context,()=> context.go(Routes.verifyCodeSocial));

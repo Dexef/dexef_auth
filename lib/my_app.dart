@@ -93,13 +93,6 @@ class MyAppState extends State<MyApp> {
     navigatorKey: navigatorKey,
     routerNeglect: true,
     refreshListenable: routerNotifier,
-    routes: [
-      ShellRoute(
-        builder: (context, state, child) {
-          return MainScaffold(child: child); // <- Always show header & footer
-        },
-        routes: routes
-      ),
-    ],
+    routes: routes,
   );
 }

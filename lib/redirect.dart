@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:html' as html;
 import 'core/rest/routes.dart';
-import 'dexef_auth/login/presentation/pages/login_page.dart';
+import 'features/login/presentation/pages/1.login.dart';
 import 'my_app.dart';
 
 initializeRoute() {

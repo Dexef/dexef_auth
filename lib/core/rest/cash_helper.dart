@@ -139,7 +139,7 @@ class CacheHelper {
         return ArgumentDownloadApp.fromJson(jsonDecode(jsonString!));
       case ArgumentAddon:
         return ArgumentAddon.fromJson(jsonDecode(jsonString));
-        case ArgumentsAddonVersion:
+      case ArgumentsAddonVersion:
         return ArgumentsAddonVersion.fromJson(jsonDecode(jsonString));
 
     }

@@ -402,11 +402,11 @@ class _AdminSignUpState extends State<AdminSignUp> {
                                                     countryCode + phoneController.text;
                                               }
                                               signUpCubit!.registerNormal(
-                                                phoneOrEmailController.text,
-                                                nameController.text,
-                                                phoneNum,
-                                                passwordController.text,
-                                                countryCode,
+                                                email: phoneOrEmailController.text,
+                                                name: nameController.text,
+                                                phoneNumber: phoneNum,
+                                                password: passwordController.text,
+                                                countryCode: countryCode,
                                               );
                                             }
                                           }
@@ -470,11 +470,11 @@ class _AdminSignUpState extends State<AdminSignUp> {
                                                 phoneNum = countryCode + phoneController.text;
                                               }
                                               signUpCubit!.registerNormal(
-                                                phoneOrEmailController.text,
-                                                nameController.text,
-                                                phoneNum,
-                                                passwordController.text,
-                                                countryCode,
+                                                email: phoneOrEmailController.text,
+                                                name: nameController.text,
+                                                phoneNumber: phoneNum,
+                                                password: passwordController.text,
+                                                countryCode: countryCode,
                                               );
                                             }
                                           }
@@ -507,10 +507,10 @@ class _AdminSignUpState extends State<AdminSignUp> {
                                           phoneNumber = phone.phoneNumber;
                                           countryCode = phone.dialCode.toString();
                                           setState(() {
-                                            if(state is SignUpFailed){
-                                              state.signUpErrors.clear();
-                                              // (state as SignUpFailed).signUpErrors.clear();
-                                            }
+                                            // if(state is SignUpFailed){
+                                            //   state.signUpErrors.clear();
+                                            //   // (state as SignUpFailed).signUpErrors.clear();
+                                            // }
                                             registerErrors = {};
                                             signUpCubit?.errorMessage = '';
                                             if (phoneController.text.startsWith('0')) {
@@ -586,11 +586,11 @@ class _AdminSignUpState extends State<AdminSignUp> {
                                                   countryCode + phoneController.text;
                                             }
                                             signUpCubit!.registerNormal(
-                                              phoneOrEmailController.text,
-                                              nameController.text,
-                                              phoneNum,
-                                              passwordController.text,
-                                              countryCode,
+                                              email: phoneOrEmailController.text,
+                                              name: nameController.text,
+                                              phoneNumber: phoneNum,
+                                              password: passwordController.text,
+                                              countryCode: countryCode,
                                             );
                                           }
                                         }
@@ -644,23 +644,13 @@ class _AdminSignUpState extends State<AdminSignUp> {
                                             }
                                             print(phoneNum);
                                             signUpCubit!.registerNormal(
-                                              phoneOrEmailController.text,
-                                              nameController.text,
-                                              // "+"+countryCode + phoneController.text,
-                                              phoneNum,
-                                              passwordController.text,
-                                              countryCode,
+                                              email: phoneOrEmailController.text,
+                                              name: nameController.text,
+                                              phoneNumber: phoneNum,
+                                              password: passwordController.text,
+                                              countryCode: countryCode,
                                             );
                                           }
-
-                                          // signUpCubit!.signUP(
-                                          //   phoneOrEmailController.text,
-                                          //   nameController.text,
-                                          //   "+2" + phoneController.text,
-                                          //   passwordController.text,
-                                          //   "20",
-                                          // );
-                                          // }
                                         }
                                       },
                                       label: AppLocalizations.of(context)!.translate('password'),
@@ -710,12 +700,11 @@ class _AdminSignUpState extends State<AdminSignUp> {
                                             }
                                             print(phoneNum);
                                             signUpCubit!.registerNormal(
-                                              phoneOrEmailController.text,
-                                              nameController.text,
-                                              // "+"+countryCode + phoneController.text,
-                                              phoneNum,
-                                              passwordController.text,
-                                              countryCode,
+                                              email: phoneOrEmailController.text,
+                                              name: nameController.text,
+                                              phoneNumber: phoneNum,
+                                              password: passwordController.text,
+                                              countryCode: countryCode,
                                             );
                                           }
 
@@ -778,12 +767,11 @@ class _AdminSignUpState extends State<AdminSignUp> {
                                                       phoneController.text;
                                                 }
                                                 signUpCubit!.registerNormal(
-                                                  phoneOrEmailController.text,
-                                                  nameController.text,
-                                                  // "+"+countryCode + phoneController.text,
-                                                  phoneNum,
-                                                  passwordController.text,
-                                                  countryCode,
+                                                  email: phoneOrEmailController.text,
+                                                  name: nameController.text,
+                                                  phoneNumber: phoneNum,
+                                                  password: passwordController.text,
+                                                  countryCode: countryCode,
                                                 );
                                               }
                                             }

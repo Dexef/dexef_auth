@@ -1,24 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:gap/gap.dart';
-import 'package:intl_phone_field/countries.dart';
-import 'package:mydexef/features/auth/presentation/pages/1.login_screen/widgets/password_login_Widget.dart';
-import 'package:mydexef/features/auth/presentation/pages/1.login_screen/widgets/popUp_countryCode_widget.dart';
-import 'package:mydexef/utils/cash_helper.dart';
-import '../../../../../../core/class_constants/constants_methods.dart';
-import '../../../../../../core/model/CountryModel.dart';
 import '../../../../../../core/size_widgets/app_screen_size.dart';
-import '../../../../../../core/widgets/custom_round_button.dart';
-import '../../../../../../core/widgets/custom_text_field.dart';
 import '../../../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../../../core/widgets/default_text.dart';
 import '../../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../../utils/app_localizations.dart';
-import '../../../../../../utils/constants.dart';
-import '../../../../../../utils/regex.dart';
-import '../../../../login/presentation/cubit/login_cubit.dart';
-import '../../../../login/presentation/cubit/login_state.dart';
+import '../../../features/login/presentation/cubit/login_cubit.dart';
+import '../../../features/login/presentation/cubit/login_state.dart';
+import '../../rest/app_localizations.dart';
+import '../../rest/cash_helper.dart';
+import '../../rest/constants.dart';
+import '../../rest/regex.dart';
+import '../public/custom_round_button.dart';
+import '../public/custom_text_field.dart';
+import '../public/default_text.dart';
 import 'drop_down_countries_widget.dart';
 
 class EmailLoginWidget extends StatefulWidget {
@@ -110,8 +104,6 @@ class _EmailLoginWidgetState extends State<EmailLoginWidget> {
                 widget.formKey.currentState!.save();
                 widget.loginCubit.errorMessage = null;
                 await widget.loginCubit.validateEmailNormal(widget.phoneOrEmail.text);
-                widget.loginCubit.socialLogin = '';
-                widget.loginCubit.modifyDataFromPassword = false;
                 debugPrint("selectedCountryCode ${CacheHelper.getData(key: Constants.selectedCountryCode.toString())}");
               }
             },

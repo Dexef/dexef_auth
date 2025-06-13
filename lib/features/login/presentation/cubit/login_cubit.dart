@@ -38,21 +38,19 @@ class LoginCubit extends Cubit<LoginState> {
   static LoginCubit get instance => _loginCubit;
 ////////////////////////////////////////////////////////////////////////////////
   final LoginUseCase loginUseCase;
-  GoogleSignInUseCase googleSignInUseCase;
-  AppleSignInUseCase appleSignInUseCase;
-  ValidateEmailUseCase validateEmailUseCase;
-  LoginEntity? loginEntity;
-  bool isLoading = false;
-  bool modifyDataFromPassword = false;
+  final GoogleSignInUseCase googleSignInUseCase;
+  final AppleSignInUseCase appleSignInUseCase;
+  final ValidateEmailUseCase validateEmailUseCase;
   String? errorMessage;
+  bool isLoading = false;
+  bool writePassword = false;
 /////////////////////////////////////////////////////////////////////////////////////////////// validate email
 ///////////////////////////////////////////////////////////////////////////////////////////////
   String? loginType;
   ValidateEmailEntity? validateEmailEntity;
-  bool validateSuccess = false;
   validateEmail({required String userName}) async {
-    isLoading = true;
     loginType = null;
+    isLoading = true;
     emit(ValidateEmailLoading());
     final result = await validateEmailUseCase(userName);
     result.fold((failure) {
@@ -70,12 +68,7 @@ class LoginCubit extends Cubit<LoginState> {
         emit(ValidateEmailSuccess(validateEmailEntity: validate));
       }else{
         isLoading = false;
-        validateSuccess = false;
-        if (socialLogin == AppConstants.appleString || socialLogin == AppConstants.googleString){
-          errorMessage = null;
-        }else if (loginType == null || loginType == ""){
-          errorMessage = validate.errors?.first.message;
-        }
+        errorMessage = validate.errors?.first.message;
         emit(ValidateEmailError(validate.errors?.first.message));
       }
     });
@@ -86,8 +79,7 @@ class LoginCubit extends Cubit<LoginState> {
       emailOrPhone = emailOrPhone.replaceFirst('0', '');
     }
     try {
-      validateSuccess = true;
-      isLoading = true;
+      isLoading = false;
       emit(ValidateEmailLoading());
       String? dialCode;
       dialCode = CacheHelper.getData(key: Constants.selectedCountryCode.toString()) ?? await lookupUserCountry();
@@ -102,10 +94,11 @@ class LoginCubit extends Cubit<LoginState> {
           validateEmail(userName: '+$dialCode$emailOrPhone',);
         }
       }
-    }catch (e) {
-      isLoading = false;
-      validateSuccess = false;
+    }catch(e){
+      errorMessage = e.toString();
       debugPrint('error :${e.toString()}');
+      isLoading = false;
+      emit(ValidateEmailError(e.toString()));
     }
   }
 /////////////////////////////////////////////////////////////////////////////////////////////// country code with IP
@@ -133,15 +126,9 @@ class LoginCubit extends Cubit<LoginState> {
       emit(GetIPForCountryFailure(e.toString()));
     }
   }
-//////////////////////////////////////////////////////////////////////////////// getting email
-//   String? emailType;
-//   getEmailType(){
-//     emailType = validateEmailEntity?.data?.type ?? CacheHelper.getData(key: Constants.emailType.toString());
-//     return emailType;
-//   }
 ///////////////////////////////////////////////////////////////////////////////////////////////  normal login
 ///////////////////////////////////////////////////////////////////////////////////////////////
-  Future<void> signInNormal(
+  Future<void> loginNormal(
     BuildContext context,{
     required String emailOrPhone,
     required String passwordText,
@@ -172,6 +159,7 @@ class LoginCubit extends Cubit<LoginState> {
     }
   }
 ////////////////////////////////////////////////////////////////////////////////
+  LoginEntity? loginEntity;
   Future<void> normalLogin(
     BuildContext context,{
     required String emailOrPhone,
@@ -200,151 +188,6 @@ class LoginCubit extends Cubit<LoginState> {
     });
   }
 ////////////////////////////////////////////////////////////////////////////////
-  void saveEmailAndPasswordInShared(String emailOrPhone, String password) {
-    bool rememberMeChecker = CacheHelper.getData(key: Constants.rememberMeChecker.toString()) ?? false;
-    if (rememberMeChecker) {
-      CacheHelper.saveData(key: Constants.emailOrPhone.toString(), value: emailOrPhone);
-      CacheHelper.saveData(key: Constants.password.toString(), value: password);
-    }
-  }
-/////////////////////////////////////////////////////////////////////////////////////////////// sign in with google mobile firebase
-///////////////////////////////////////////////////////////////////////////////////////////////
-  UserCredential? credGoogle;
-  AuthCredential? credentialGoogle;
-  Future<void> signInWithGoogle() async {
-    emit(SignInWithGoogleMobileLoading());
-    try {
-      credentialGoogle = await DefaultSignInGoogle();
-      credGoogle = await FirebaseAuth.instance.signInWithCredential(credentialGoogle!);
-      debugPrint('Sign in With Google Success');
-      emit(SignInWithGoogleMobileSuccess());
-    } catch (e) {
-      log('error is ${e.toString()}');
-      errorMessage = e.toString();
-      emit(SignInWithGoogleMobileError(e.toString()));
-    }
-  }
-////////////////////////////////////////////////////////////////////////////////  sign in with google web firebase
-  UserCredential? credGoogleWeb;
-  FirebaseAuth firebaseAuthGoogle = FirebaseAuth.instance;
-  String socialLogin = '';
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  signInWithGoogleWeb(bool isSignIn) async {
-    emit(SignInWithGoogleWebLoading());
-    try {
-      if(isSignIn){
-        clearCookies();
-      }
-      handleSignOut();
-      GoogleAuthProvider googleProvider = GoogleAuthProvider();
-      googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-      googleProvider.setCustomParameters({'prompt': 'select_account'});
-      credGoogleWeb = await FirebaseAuth.instance.signInWithPopup(googleProvider);
-      socialLogin =  AppConstants.googleString;
-      emit(SignInWithGoogleWebSuccess());
-    }catch(e){
-      errorMessage = e.toString();
-      log('${e.hashCode} Error Google web is ${e.toString()}');
-      if (e.toString().contains(AppConstants.popupCanceledByUser) ||
-          e.toString().contains(AppConstants.beforeFinalizingOperation) ||
-          e.toString().contains('popup-closed-by-user') || e.toString().contains('cancelled-popup-request')) {
-        debugPrint('Canceled By User');
-        errorMessage = '';
-        emit(CanceledByUserWebGoogle());
-      } else{
-        emit(SignInWithGoogleWebError(e.toString()));
-      }
-    }
-  }
-////////////////////////////////////////////////////////////////////////////////
-  void clearCookies() {
-    html.document.cookie = "";
-    debugPrint("Cookies cleared.");
-  }
-////////////////////////////////////////////////////////////////////////////////
-  Future<void> handleSignOut() async {
-    try {
-      await _googleSignIn.disconnect();
-      debugPrint("User disconnected successfully.");
-    } catch (error) {
-      debugPrint("Error disconnecting: $error");
-    }
-  }
-//////////////////////////////////////////////////////////////////////////////// login in with google
-  loginWithGoogle({required String token, context}) async {
-    isLoading = true;
-    emit(LoginWithGoogleLoading());
-    final result = await googleSignInUseCase(token);
-    result.fold((failure) {
-      errorMessage = failure.toString();
-      emit(LoginWithGoogleFailure(failure.errorMessage));
-    }, (signInGoogle) async {
-      if (signInGoogle.isSuccess == true) {
-        log('Success = true');
-        saveSocialData(signInGoogle, context);
-        emit(LoginWithGoogleSuccess(signInGoogle));
-      } else {
-        log('Success = false');
-        log('Success = ${signInGoogle.errors?.first.message}');
-        if (signInGoogle.errors!.first.message.toString().contains('غير موجود') ||
-            signInGoogle.errors!.first.message.toString().contains('Not Found') ||
-            signInGoogle.errors!.first.message.toString().contains('This mobile is not verified') ||
-            signInGoogle.errors!.first.message.toString().contains('هذا الرقم غير مفعل')) {
-          errorMessage = null;
-        }
-        emit(LoginWithGoogleError(signInGoogle.errors?.first.message));
-      }
-    });
-  }
-/////////////////////////////////////////////////////////////////////////////////////////////// sign in with apple mobile firebase
-///////////////////////////////////////////////////////////////////////////////////////////////
-  UserCredential? appleCredential;
-  String? idToken;
-  String? appleEmail;
-  signInWithAppleWeb() async {
-    try {
-      emit(SignInAppleLoadingFirebase());
-      final provider = OAuthProvider("apple.com")..addScope('email')..addScope('name');
-      appleCredential = await FirebaseAuth.instance.signInWithPopup(provider);
-      idToken = await appleCredential?.user?.getIdToken();
-      appleEmail = appleCredential?.user?.email;
-      socialLogin = AppConstants.appleString;
-      emit(SignInAppleSuccessFirebase());
-    } catch (e) {
-      debugPrint("error apple =  $e");
-      emit(SignInAppleErrorFirebase(e.toString()));
-    }
-  }
-//////////////////////////////////////////////////////////////////////////////// login with apple
-  loginWithApple({required String token, context}) async {
-    emit(LoginWithAppleLoading());
-    final result = await appleSignInUseCase(token);
-    result.fold((failure) {
-      emit(LoginWithAppleFailure(failure.errorMessage));
-    }, (appleSignIn) async {
-      try {
-        if (appleSignIn.isSuccess == true) {
-          log('Success = true');
-          saveSocialData(appleSignIn, context);
-          DioHelper.init();
-          emit(LoginWithAppleSuccess(appleSignIn));
-        } else {
-          log('Success = false');
-          errorMessage = appleSignIn.errors?.first.message;
-          if (appleSignIn.errors!.first.message.toString().contains('غير موجود') ||
-              appleSignIn.errors!.first.message.toString().contains('Not Found') ||
-              appleSignIn.errors!.first.message.toString().contains('This mobile is not verified') ||
-              appleSignIn.errors!.first.message.toString().contains('هذا الرقم غير مفعل')) {
-            errorMessage = null;
-          }
-          emit(LoginWithAppleError(appleSignIn.errors!.first.message!));
-        }
-      } catch (e) {
-        emit(LoginWithAppleError(appleSignIn.errors!.first.message!));
-      }
-    });
-  }
-////////////////////////////////////////////////////////////////////////////////
   void saveSocialData(entity, BuildContext context){
     CacheHelper.saveData(key: Constants.token.toString(), value: entity.data!.token);
     CacheHelper.saveData(key: Constants.refreshToken.toString(), value: entity.data!.refreshToken);
@@ -366,6 +209,162 @@ class LoginCubit extends Cubit<LoginState> {
     CacheHelper.saveData(key: Constants.customerLastName.toString(), value: customerLastName);
     DioHelper.init();
   }
+////////////////////////////////////////////////////////////////////////////////
+  void saveEmailAndPasswordInShared(String emailOrPhone, String password) {
+    bool rememberMeChecker = CacheHelper.getData(key: Constants.rememberMeChecker.toString()) ?? false;
+    if (rememberMeChecker) {
+      CacheHelper.saveData(key: Constants.emailOrPhone.toString(), value: emailOrPhone);
+      CacheHelper.saveData(key: Constants.password.toString(), value: password);
+    }
+  }
+/////////////////////////////////////////////////////////////////////////////////////////////// sign in with google mobile firebase
+///////////////////////////////////////////////////////////////////////////////////////////////
+  UserCredential? credGoogle;
+  AuthCredential? credentialGoogle;
+  Future<void> signInWithGoogle() async {
+    isLoading = true;
+    emit(SignInWithGoogleMobileLoading());
+    try {
+      credentialGoogle = await DefaultSignInGoogle();
+      credGoogle = await FirebaseAuth.instance.signInWithCredential(credentialGoogle!);
+      debugPrint('Sign in With Google Success');
+      isLoading = false;
+      emit(SignInWithGoogleMobileSuccess());
+    } catch (e) {
+      log('error is ${e.toString()}');
+      errorMessage = e.toString();
+      isLoading = false;
+      emit(SignInWithGoogleMobileError(e.toString()));
+    }
+  }
+////////////////////////////////////////////////////////////////////////////////  sign in with google web firebase
+  UserCredential? credGoogleWeb;
+  signInWithGoogleWeb(bool isSignIn) async {
+    isLoading = true;
+    emit(SignInWithGoogleWebLoading());
+    try {
+      if(isSignIn){
+        clearCookies();
+      }
+      handleSignOut();
+      GoogleAuthProvider googleProvider = GoogleAuthProvider();
+      googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+      googleProvider.setCustomParameters({'prompt': 'select_account'});
+      credGoogleWeb = await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      isLoading = false;
+      emit(SignInWithGoogleWebSuccess());
+    }catch(e){
+      errorMessage = e.toString();
+      log('${e.hashCode} Error Google web is ${e.toString()}');
+      if (e.toString().contains(AppConstants.popupCanceledByUser) ||
+          e.toString().contains(AppConstants.beforeFinalizingOperation) ||
+          e.toString().contains('popup-closed-by-user') || e.toString().contains('cancelled-popup-request')) {
+        debugPrint('Canceled By User');
+        errorMessage = '';
+        isLoading = false;
+        emit(CanceledByUserWebGoogle());
+      } else{
+        isLoading = false;
+        emit(SignInWithGoogleWebError(e.toString()));
+      }
+    }
+  }
+////////////////////////////////////////////////////////////////////////////////
+  void clearCookies() {
+    html.document.cookie = "";
+    debugPrint("Cookies cleared.");
+  }
+////////////////////////////////////////////////////////////////////////////////
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  Future<void> handleSignOut() async {
+    try {
+      await _googleSignIn.disconnect();
+      debugPrint("User disconnected successfully.");
+    } catch (error) {
+      debugPrint("Error disconnecting: $error");
+    }
+  }
+//////////////////////////////////////////////////////////////////////////////// login in with google
+  loginWithGoogle({required String token, context}) async {
+    isLoading = true;
+    emit(LoginWithGoogleLoading());
+    final result = await googleSignInUseCase(token);
+    result.fold((failure) {
+      errorMessage = failure.toString();
+      isLoading = false;
+      emit(LoginWithGoogleFailure(failure.errorMessage));
+    }, (signInGoogle) async {
+      if (signInGoogle.isSuccess == true) {
+        log('Success = true');
+        saveSocialData(signInGoogle, context);
+        isLoading = false;
+        emit(LoginWithGoogleSuccess(signInGoogle));
+      } else {
+        log('Success = false');
+        log('Success = ${signInGoogle.errors?.first.message}');
+        if (signInGoogle.errors!.first.message.toString().contains('غير موجود') ||
+            signInGoogle.errors!.first.message.toString().contains('Not Found') ||
+            signInGoogle.errors!.first.message.toString().contains('This mobile is not verified') ||
+            signInGoogle.errors!.first.message.toString().contains('هذا الرقم غير مفعل')) {
+          errorMessage = null;
+        }
+        isLoading = false;
+        emit(LoginWithGoogleError(signInGoogle.errors?.first.message));
+      }
+    });
+  }
+/////////////////////////////////////////////////////////////////////////////////////////////// sign in with apple mobile firebase
+///////////////////////////////////////////////////////////////////////////////////////////////
+  UserCredential? appleCredential;
+  String? idToken;
+  signInWithAppleWeb() async {
+    isLoading = true;
+    emit(SignInAppleLoadingFirebase());
+    try {
+      final provider = OAuthProvider("apple.com")..addScope('email')..addScope('name');
+      appleCredential = await FirebaseAuth.instance.signInWithPopup(provider);
+      idToken = await appleCredential?.user?.getIdToken();
+      isLoading = false;
+      emit(SignInAppleSuccessFirebase());
+    } catch (e) {
+      debugPrint("error apple =  $e");
+      isLoading = false;
+      emit(SignInAppleErrorFirebase(e.toString()));
+    }
+  }
+//////////////////////////////////////////////////////////////////////////////// login with apple
+  loginWithApple({required String token, context}) async {
+    isLoading = true;
+    emit(LoginWithAppleLoading());
+    final result = await appleSignInUseCase(token);
+    result.fold((failure) {
+      isLoading = false;
+      emit(LoginWithAppleFailure(failure.errorMessage));
+    }, (appleSignIn) async {
+      try {
+        if (appleSignIn.isSuccess == true) {
+          log('Success = true');
+          saveSocialData(appleSignIn, context);
+          isLoading = false;
+          emit(LoginWithAppleSuccess(appleSignIn));
+        } else {
+          log('Success = false');
+          errorMessage = appleSignIn.errors?.first.message;
+          if (appleSignIn.errors!.first.message.toString().contains('غير موجود') ||
+              appleSignIn.errors!.first.message.toString().contains('Not Found') ||
+              appleSignIn.errors!.first.message.toString().contains('This mobile is not verified') ||
+              appleSignIn.errors!.first.message.toString().contains('هذا الرقم غير مفعل')) {
+            errorMessage = null;
+          }
+          isLoading = false;
+          emit(LoginWithAppleError(appleSignIn.errors!.first.message!));
+        }
+      } catch (e) {
+        isLoading = false;
+        emit(LoginWithAppleError(appleSignIn.errors!.first.message!));
+      }
+    });
+  }
 /////////////////////////////////////////////////////////////////////////////////////////////// sign out with google
 ///////////////////////////////////////////////////////////////////////////////////////////////
   GoogleSignIn googleSignInNew = GoogleSignIn(
@@ -375,7 +374,7 @@ class LoginCubit extends Cubit<LoginState> {
     emit(SignOutGoogleLoading());
     try {
       if (kIsWeb) {
-        await googleSignInNew.signOut().then((value) {
+        await googleSignInNew.signOut().then((value){
           FirebaseAuth.instance.signOut();
           emit(SignOutGoogleWebSuccess());
         }).catchError((error) {
@@ -413,7 +412,6 @@ class LoginCubit extends Cubit<LoginState> {
     CacheHelper.saveData(key: Constants.emailType.toString(), value: '');
     loginType = CacheHelper.getData(key: Constants.emailType.toString());
     changeErrorMessageState();
-    modifyDataFromPassword = true;
     emit(ModifyDataState());
   }
 //////////////////////////////////////////////////////////////////////////////// search
