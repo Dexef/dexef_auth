@@ -1,4 +1,6 @@
+import 'package:auth_dexef/core/rest/app_constants.dart';
 import 'package:auth_dexef/core/rest/error_model.dart';
+import 'package:auth_dexef/features/login/presentation/cubit/login_cubit.dart';
 import 'package:auth_dexef/features/register/presentation/cubit/sign_up_states.dart';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
@@ -12,8 +14,10 @@ import '../../../../core/rest/constants.dart';
 import '../../../../core/rest/firebase_auth.dart';
 import '../../../../main.dart';
 import '../../../login/domain/entity/validate_email_entity.dart';
+import '../../domain/entity/register_google_entity.dart';
 import '../../domain/entity/register_normal_entity.dart';
 import '../../domain/useCase/reend_code_use_case.dart';
+import '../../domain/useCase/register_google_useCase.dart';
 import '../../domain/useCase/register_normal_useCase.dart';
 import '../../../login/domain/useCase/validate_email_use_case.dart';
 import '../../../../core/rest/sign_up_errors_values.dart';
@@ -30,10 +34,6 @@ class RegisterCubit extends Cubit<RegisterStates> {
   static RegisterCubit get(context) => BlocProvider.of(context);
   static final RegisterCubit _registerCubit = BlocProvider.of<RegisterCubit>(navigatorKey.currentState!.context);
   static RegisterCubit get instance => _registerCubit;
-////////////////////////////////////////////////////////////////////////////////
-
-  final ResendCodeUseCase resendCodeUseCase;
-  final ValidateEmailUseCase validateEmailUseCase;
 /////////////////////////////////////////////////////////////////////////////////////////////// register normal
 ///////////////////////////////////////////////////////////////////////////////////////////////
   String? errorMessage;
@@ -66,63 +66,77 @@ class RegisterCubit extends Cubit<RegisterStates> {
       }
     });
   }
-////////////////////////////////////////////////////////////////////////////////
-  bool hasPhoneError(List<Errors> errors){
-    final uniqueErrors = <String>{}; // A set to store unique error messages
-    return errors.any((error) {
-      // If the message is not already in the set, add it
-      if (uniqueErrors.add(error.message!)) {
-        // Check if the error message matches the ones you want to handle
-        return error.message == SignUpErrorConstants.mobileFoundAr ||
-            error.message == SignUpErrorConstants.mobileFoundEn;
+//////////////////////////////////////////////////////////////////////////////// phone error
+  bool hasPhoneError(String? errorMessage){
+    if(errorMessage != null){
+      if(errorMessage.contains(SignUpErrorConstants.mobileFoundAr)
+          || errorMessage.contains(SignUpErrorConstants.mobileFoundEn
+      )){
+        return true;
       }
-      return false;
-    });
-  }
-
-  bool hasEmailError(List<Errors> errors) {
-    return errors.any((error) =>
-        error.message == SignUpErrorConstants.emailFoundAr ||
-        error.message == SignUpErrorConstants.emailFoundEn ||
-        error.message == SignUpErrorConstants.emailBelongedAr ||
-        error.message == SignUpErrorConstants.emailBelongedEn);
-  }
-
-  ////////////////////  sign Up with google android & IOS
-  dynamic credGoogle;
-  AuthCredential? credentialGoogle;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-
-  void clearCookies() {
-    html.document.cookie = "";
-    print("Cookies cleared.");
-  }
-
-  Future<void> handleSignOut() async {
-    try {
-      await _googleSignIn.disconnect();
-    } catch (error) {
-      print("Error disconnecting: $error");
     }
+    return false;
   }
-
+//////////////////////////////////////////////////////////////////////////////// email error
+  bool hasEmailError(String? errorMessage) {
+    if(errorMessage != null){
+      if(
+        errorMessage.contains(SignUpErrorConstants.emailFoundAr)
+        || errorMessage.contains(SignUpErrorConstants.emailFoundEn)
+        || errorMessage.contains(SignUpErrorConstants.emailBelongedAr)
+        || errorMessage.contains(SignUpErrorConstants.emailBelongedEn)
+      ){
+        return true;
+      }
+    }
+    return false;
+  }
+/////////////////////////////////////////////////////////////////////////////////////////////// register google
+//////////////////////////////////////////////////////////////////////////////// register google mobile firebase
+  UserCredential? credGoogle;
+  AuthCredential? credentialGoogle;
   signUpWithGoogle(context) async {
     emit(SignUpGoogleLoading());
     try {
       handleSignOut();
       credentialGoogle = await DefaultSignInGoogle();
       credGoogle = await FirebaseAuth.instance.signInWithCredential(credentialGoogle!);
-      socialLogin = 'Google';
-      debugPrint('google token ' + credentialGoogle!.accessToken!);
+      debugPrint('google token ${credentialGoogle!.accessToken!}');
       emit(SignUpGoogleSuccess());
     } catch (e) {
       errorMessage = e.toString();
-      print('error is ${e.toString()}');
+      debugPrint('error is ${e.toString()}');
       emit(SignUpGoogleError(e.toString()));
     }
   }
+//////////////////////////////////////////////////////////////////////////////// sign out
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  void clearCookies() {
+    html.document.cookie = "";
+    debugPrint("Cookies cleared.");
+  }
 
-  ////////////////////////// Sign Up with google web
+  Future<void> handleSignOut() async {
+    try {
+      await _googleSignIn.disconnect();
+    } catch (error) {
+      debugPrint("Error disconnecting: $error");
+    }
+  }
+
+  Future<void> signOut() async {
+    emit(SignOutGoogleLoading());
+    try {
+      googleSignIn.signOut().then((value) {
+        emit(SignOutGoogleSuccess());
+      }).catchError((error) {
+        emit(SignOutGoogleError());
+      });
+    } catch (e) {
+      emit(SignOutGoogleError());
+    }
+  }
+//////////////////////////////////////////////////////////////////////////////// register google web firebase
   UserCredential? credGoogleWeb;
   signUpWithGoogleWeb() async {
     emit(SignUpGoogleWebLoading());
@@ -136,16 +150,14 @@ class RegisterCubit extends Cubit<RegisterStates> {
         'prompt': 'select_account',
         // Ensures user selects or enters a new account
       });
-      credGoogleWeb =
-          await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      credGoogleWeb = await FirebaseAuth.instance.signInWithPopup(googleProvider);
       debugPrint('Google token ${credGoogleWeb!.credential!.accessToken!}');
-      socialLogin = 'Google';
       emit(SignUpGoogleWebSuccess());
     } catch (e) {
-      print('Error Google web is ${e.toString()}');
+      debugPrint('Error Google web is ${e.toString()}');
       errorMessage = e.toString();
-      if (e.toString().contains(popupCanceledByUser) ||
-          e.toString().contains(beforeFinalizingOperation) ||
+      if (e.toString().contains(AppConstants.registerPopupCanceledByUser) ||
+          e.toString().contains(AppConstants.registerBeforeFinalizingOperation) ||
           e.toString().contains('popup-closed-by-user') ||
           e.toString().contains('cancelled-popup-request')) {
         debugPrint('Canceled By User');
@@ -156,129 +168,35 @@ class RegisterCubit extends Cubit<RegisterStates> {
       }
     }
   }
-
-  String popupCanceledByUser =
-      'This operation has been cancelled due to another conflicting popup being opened';
-  String beforeFinalizingOperation =
-      'The popup has been closed by the user before finalizing the operation';
-
-  /////////////// sign out from google
-  Future<void> signOut() async {
-    emit(SignOutGoogleLoading());
-    try {
-      googleSignIn.signOut().then((value) {
-        emit(SignOutGoogleSuccess());
-      }).catchError((error) {
-        emit(SignOutGoogleError());
-      });
-    } catch (e) {
-      emit(SignOutGoogleError());
-    }
+//////////////////////////////////////////////////////////////////////////////// register google
+  final RegisterByGoogleUseCase registerByGoogleUseCase;
+  RegisterGoogleEntity? registerGoogleEntity;
+  registerGoogle({
+    required String token,
+    required String email,
+    required String mobile,
+    required String countryId,
+    required int sourceId,
+  })async{
+    emit(RegisterGoogleLoading());
+    final result = await registerByGoogleUseCase(token, email, mobile, countryId, sourceId);
+    result.fold((failure) {
+      errorMessage = failure.errorMessage;
+      emit(RegisterGoogleFailure(failure.errorMessage));
+    },(registerGoogle) {
+      if (registerGoogle.isSuccess == true) {
+        registerGoogleEntity = registerGoogle;
+        emit(RegisterGoogleSuccess(registerGoogle));
+      }else{
+        errorMessage = registerGoogle.errors!.first.message;
+        emit(RegisterGoogleError(registerGoogle.errors!.first.message));
+      }
+    });
   }
-  /////////////////  sign up with facebook android & IOS
-  // dynamic credFace;
-  // LoginResult? loginResult;
-  // signUpWithFacebook() async {
-  //   emit(SignUpFaceBookLoading());
-  //   try {
-  //     loginResult = await FacebookAuth.instance.login();
-  //     final OAuthCredential facebookAuthCredential =
-  //         FacebookAuthProvider.credential(loginResult!.accessToken!.token);
-  //     credFace = FirebaseAuth.instance
-  //         .signInWithCredential(facebookAuthCredential)
-  //         .then((value) {
-  //       log('token ${loginResult?.accessToken?.token}');
-  //       emit(SignUpFaceBookSuccess());
-  //     }).catchError((error) {
-  //       log('error is $error');
-  //       emit(SignUpFaceBookError());
-  //     });
-  //   } catch (e) {
-  //     errorMessage = e.toString();
-  //     log('error is $e');
-  //     emit(SignUpFaceBookError());
-  //   }
-  // }
-  ////////////////////////////////////// sign up with facebook web
-  // UserCredential? credFaceWeb;
-  // Future<UserCredential> signUpWithFacebookWeb() async {
-  //   await FirebaseAuth.instance.signOut();
-  //   // Sign out from Firebase
-  //   AccessToken? accessToken = await FacebookAuth.instance.accessToken;
-  //
-  //   if (accessToken != null) {
-  //     // Log out from Facebook if already logged in
-  //     await FacebookAuth.instance.logOut();
-  //   }
-  //
-  //   FacebookAuthProvider facebookProvider = FacebookAuthProvider();
-  //   facebookProvider.addScope('email');
-  //   facebookProvider.setCustomParameters({
-  //     'display': 'popup',
-  //   });
-  //
-  //   return await FirebaseAuth.instance.signInWithPopup(facebookProvider);
-  // }
-
-  // signUpWithFacebookWeb() async {
-  //   emit(SignUpFaceBookWebLoading());
-  //   try {
-  //     FacebookAuthProvider? facebookProvider = FacebookAuthProvider();
-  //     facebookProvider.addScope('email');
-  //     facebookProvider.setCustomParameters({
-  //       'display': 'popup',
-  //     });
-  //     credFaceWeb = await FirebaseAuth.instance
-  //         .signInWithPopup(facebookProvider)
-  //         .then((value) async {
-  //         //  debugPrint('token is ' + credFaceWeb!.credential!.accessToken!.toString());
-  //          // printObject(credFaceWeb!);
-  //      emit(SignUpFaceBookWebSuccess());
-  //       Fluttertoast.showToast(msg: "alaa = success");
-  //     }).catchError((error) {
-  //       Fluttertoast.showToast(msg: "error1 = $error");
-  //       debugPrint('error1 ' + error );
-  //       emit(SignUpFaceBookWebError(message: error.toString()));
-  //     });
-  //   } catch (e) {
-  //     log('error facebook $e');
-  //   //  debugPrint('hassan token is ' + credFaceWeb!.credential!.accessToken!.toString());
-  //     debugPrint('error2 ' + e.toString() );
-  //     Fluttertoast.showToast(msg: "error2 = $e");
-  //     emit(SignUpFaceBookWebError(message: e.toString()));
-  //   }
-  // }
-
-  // Future<UserCredential> signUpWithFacebookWeb() async {
-  //   FacebookAuthProvider facebookProvider = FacebookAuthProvider();
-  //   facebookProvider.addScope('email');
-  //   facebookProvider.setCustomParameters({
-  //     'display': 'popup',
-  //   });
-  //   return await FirebaseAuth.instance.signInWithPopup(facebookProvider);
-  // }
-  //////////////////////////////
-
-  bool isPasswordVisible = true;
-
-  changePasswordVisibility(bool isVisible) {
-    isPasswordVisible = !isVisible;
-    emit(ChangePasswordVisible());
-  }
-
-  bool isConfirmPasswordVisible = true;
-
-  changeConfirmPasswordVisibility(bool isVisible) {
-    isConfirmPasswordVisible = !isVisible;
-    emit(ChangePasswordVisible());
-  }
-
-  ///////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////// register apple web firebase
+///////////////////////////////////////////////////////////////////////////////////////////////
   UserCredential? appleCredential;
   String? idToken;
-  String? appleEmail;
-  String socialLogin = '';
-
   signUpWithApple() async {
     try {
       emit(SignUpAppleLoading());
@@ -287,16 +205,14 @@ class RegisterCubit extends Cubit<RegisterStates> {
         ..addScope('name');
       appleCredential = await FirebaseAuth.instance.signInWithPopup(provider);
       debugPrint("token ${appleCredential?.credential?.accessToken}");
-      appleEmail = appleCredential?.user?.email;
       idToken = await appleCredential?.user?.getIdToken();
-      socialLogin = 'apple';
       debugPrint("token $idToken");
       emit(SignUpAppleSuccess());
     } catch (e) {
       errorMessage = e.toString();
       debugPrint("error apple =  $e");
-      if (e.toString().contains(popupCanceledByUser) ||
-          e.toString().contains(beforeFinalizingOperation) ||
+      if (e.toString().contains(AppConstants.registerPopupCanceledByUser) ||
+          e.toString().contains(AppConstants.registerBeforeFinalizingOperation) ||
           e.toString().contains('popup-closed-by-user') ||
           e.toString().contains('cancelled-popup-request')) {
         debugPrint('Canceled By User');
@@ -305,10 +221,8 @@ class RegisterCubit extends Cubit<RegisterStates> {
       emit(SignUpAppleError());
     }
   }
-
-  ///////////////////////////////////
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////// validate email
+//////////////////////////////////////////////////////////////////////////////// select phone or email
   validateEmailNormal(String emailOrPhone) async {
     if (emailOrPhone.startsWith('0')) {
       emailOrPhone = emailOrPhone.replaceFirst('0', '');
@@ -316,32 +230,24 @@ class RegisterCubit extends Cubit<RegisterStates> {
     try {
       emit(ValidateEmailLoading());
       String? dialCode;
-      dialCode = await lookupUserCountry();
+      dialCode = await LoginCubit.instance.lookupUserCountry();
       if (emailOrPhone.contains('@')) {
-        validateEmail(
-          userName: emailOrPhone,
-        );
+        validateEmail(userName: emailOrPhone,);
       } else {
         bool rememberMeChecker = CacheHelper.getData(key: Constants.rememberMeChecker.toString()) ?? false;
         if (rememberMeChecker) {
-          // normalLogin(emailOrPhone, passwordText);
-          validateEmail(
-            userName: '+$dialCode$emailOrPhone',
-          );
+          validateEmail(userName: '+$dialCode$emailOrPhone',);
         } else {
-          validateEmail(
-            userName: '+$dialCode$emailOrPhone',
-          );
+          validateEmail(userName: '+$dialCode$emailOrPhone',);
         }
       }
-      // emit(ValidateEmailSuccess());
     } catch (e) {
       debugPrint('error :${e.toString()}');
     }
   }
-
+//////////////////////////////////////////////////////////////////////////////// validate email
   ValidateEmailEntity? validateEmailEntity;
-
+  final ValidateEmailUseCase validateEmailUseCase;
   validateEmail({required String userName}) async {
     emit(ValidateEmailLoading());
     final result = await validateEmailUseCase(userName);
@@ -357,48 +263,38 @@ class RegisterCubit extends Cubit<RegisterStates> {
       }
     });
   }
-
-  Dio dio = Dio();
-
-  String? userCountryCode;
-  Future<String> lookupUserCountry() async {
-    final ipAddress = ip.IpAddress(type: ip.RequestType.text);
-    final ipv4 = await ipAddress.getIpAddress();
-    final response =
-        await dio.get('https://api.ipregistry.co/$ipv4?key=tz3om0lor45w6ec6');
-    if (response.statusCode == 200) {
-      userCountryCode =  response.data['location']['country']['code'];
-      print('user code=========$userCountryCode ${response.data['location']['country']['calling_code']}');
-      emit(LookUpUserSuccess());
-
-      return response.data['location']['country']['calling_code'];
-
-    } else {
-      throw Exception('Failed to get user country from IP address');
-    }
-
-  }
-
-  void saveSignUpDataInShared(RegisterNormalEntity signup) {
-    CacheHelper.saveData(
-        key: Constants.resetExpireDate.toString(),
-        value: signup.data?.expiryDate ?? '');
-    CacheHelper.saveData(
-        key: Constants.resetBlockedDate.toString(),
-        value: signup.data?.blockTillDate ?? '');
-  }
+/////////////////////////////////////////////////////////////////////////////////////////////// resend code
 ////////////////////////////////////////////////////////////////////////////////
+  final ResendCodeUseCase resendCodeUseCase;
   resendCodeSms ({required int mobileId}) async {
     emit(LoadingState());
-    final result = await resendCodeUseCase!(mobileId,CacheHelper.getData(key: Constants.isWhatsApp.toString()) ?? true);
+    final result = await resendCodeUseCase(mobileId,CacheHelper.getData(key: Constants.isWhatsApp.toString()) ?? true);
     result.fold((failure) => emit(ResendCodeFailure(failure.errorMessage)),
-    (resendCode) {
-      if(resendCode.isSuccess == true){
-        emit(ResendCodeSuccess(resendCode));
-      }else{
-        emit(ResendCodeError(resendCode.errors?.first.message));
-      }
-    });
+            (resendCode) {
+          if(resendCode.isSuccess == true){
+            emit(ResendCodeSuccess(resendCode));
+          }else{
+            emit(ResendCodeError(resendCode.errors?.first.message));
+          }
+        });
   }
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////// public methods
+//////////////////////////////////////////////////////////////////////////////// change password
+  bool isPasswordVisible = true;
+  bool isConfirmPasswordVisible = true;
+  changePasswordVisibility(bool isVisible) {
+    isPasswordVisible = !isVisible;
+    emit(ChangePasswordVisible());
+  }
+  changeConfirmPasswordVisibility(bool isVisible) {
+    isConfirmPasswordVisible = !isVisible;
+    emit(ChangePasswordVisible());
+  }
+//////////////////////////////////////////////////////////////////////////////// save data in shared
+  void saveSignUpDataInShared(RegisterNormalEntity signup) {
+    CacheHelper.saveData(key: Constants.resetExpireDate.toString(), value: signup.data?.expiryDate ?? '');
+    CacheHelper.saveData(key: Constants.resetBlockedDate.toString(), value: signup.data?.blockTillDate ?? '');
+  }
+//////////////////////////////////////////////////////////////////////////////// resend Code Sms
+
 }

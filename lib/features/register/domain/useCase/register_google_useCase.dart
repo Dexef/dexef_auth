@@ -7,7 +7,7 @@ import '../repo/register_repo.dart';
 class RegisterByGoogleUseCase{
   final RegisterRepository registerRepository;
   RegisterByGoogleUseCase(this.registerRepository);
-  Future<Either<Failure, RegisterGoogleEntity>> call(String token, String email, String mobile, String countryId, int SourceId) async {
-   return await registerRepository.registerByGoogle(token, email, mobile, countryId, SourceId);
+  Future<Either<Failure, RegisterGoogleEntity>> call(String token, String email, String mobile, String countryId, int sourceId) async {
+   return await registerRepository.registerByGoogle(token, email, mobile, countryId, sourceId);
   }
 }

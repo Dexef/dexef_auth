@@ -218,7 +218,7 @@ class LoginCubit extends Cubit<LoginState> {
     }
   }
 /////////////////////////////////////////////////////////////////////////////////////////////// sign in with google mobile firebase
-///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////// sign in with google mobile firebase
   UserCredential? credGoogle;
   AuthCredential? credentialGoogle;
   Future<void> signInWithGoogle() async {
@@ -256,8 +256,8 @@ class LoginCubit extends Cubit<LoginState> {
     }catch(e){
       errorMessage = e.toString();
       log('${e.hashCode} Error Google web is ${e.toString()}');
-      if (e.toString().contains(AppConstants.popupCanceledByUser) ||
-          e.toString().contains(AppConstants.beforeFinalizingOperation) ||
+      if (e.toString().contains(AppConstants.loginPopupCanceledByUser) ||
+          e.toString().contains(AppConstants.loginBeforeFinalizingOperation) ||
           e.toString().contains('popup-closed-by-user') || e.toString().contains('cancelled-popup-request')) {
         debugPrint('Canceled By User');
         errorMessage = '';

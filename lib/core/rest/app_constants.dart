@@ -13,7 +13,10 @@ class AppConstants{
   static const String tabletDevice = 'mobileDevice';
   static const String webDevice = 'mobileDevice';
 ////////////////////////////////////////////////////////////////////////////////
-  static String popupCanceledByUser = 'by the user before finalizing the operation';
-  static String beforeFinalizingOperation = 'The popup has been closed by the user before finalizing the operation';
+  static String loginPopupCanceledByUser = 'by the user before finalizing the operation';
+  static String loginBeforeFinalizingOperation = 'The popup has been closed by the user before finalizing the operation';
+////////////////////////////////////////////////////////////////////////////////
+  static String registerPopupCanceledByUser = 'This operation has been cancelled due to another conflicting popup being opened';
+  static String registerBeforeFinalizingOperation = 'The popup has been closed by the user before finalizing the operation';
 }
 

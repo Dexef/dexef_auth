@@ -1,6 +1,7 @@
 import 'package:auth_dexef/core/rest/error_model.dart';
 
 import '../../../login/domain/entity/validate_email_entity.dart';
+import '../../domain/entity/register_google_entity.dart';
 import '../../domain/entity/resend_code_entity.dart';
 
 abstract class RegisterStates{}
@@ -19,6 +20,20 @@ class RegisterNormalFailure extends RegisterStates{
 class RegisterNormalError extends RegisterStates{
   String? message;
   RegisterNormalError(this.message);
+}
+//////////////////////////////////////////////////////////////////////////////// register google
+class RegisterGoogleLoading extends RegisterStates{}
+class RegisterGoogleSuccess extends RegisterStates{
+  RegisterGoogleEntity registerGoogleEntity;
+  RegisterGoogleSuccess(this.registerGoogleEntity);
+}
+class RegisterGoogleFailure extends RegisterStates{
+  String? message;
+  RegisterGoogleFailure(this.message);
+}
+class RegisterGoogleError extends RegisterStates{
+  String? message;
+  RegisterGoogleError(this.message);
 }
 ////////////////////////////////////////////////////////////////////////////////
 // class SignUpSuccess extends RegisterStates{
