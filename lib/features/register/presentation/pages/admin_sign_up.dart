@@ -654,7 +654,7 @@ class _AdminSignUpState extends State<AdminSignUp> {
           title: AppLocalizations.of(context)!.translate('signUpFailed'),
           subTitle: getErrorMessage(state.message!),
           textColor: Colors.black);
-    } else if (state is ValidateEmailSuccess) {
+    } else if (state is ValidateEmailSuccess){
       if(state.validateEmailEntity?.data?.customerStatus != null){
         Router.neglect(context, () {context.go(Routes.verifyCodeSocial);});
         CacheHelper.saveObjectToPrefs(

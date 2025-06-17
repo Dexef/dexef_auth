@@ -4,6 +4,7 @@ import 'dart:html' as html;
 import 'core/rest/routes.dart';
 import 'features/login/presentation/pages/1.login.dart';
 import 'features/register/presentation/pages/admin_sign_up.dart';
+import 'features/register/presentation/pages/change_phone_number.dart';
 import 'my_app.dart';
 
 initializeRoute() {
@@ -20,6 +21,13 @@ initializeRoute() {
       path: Routes.adminSignUpScreen,
       pageBuilder: (BuildContext context, GoRouterState state) {
         return const NoTransitionPage(child: AdminSignUp());
+      },
+    ),
+    GoRoute(
+      name: Routes.changePhoneNumber,
+      path: Routes.changePhoneNumber,
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        return const NoTransitionPage(child: ChangePhoneNumber());
       },
     ),
   ];
