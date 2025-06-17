@@ -7,7 +7,8 @@ class ResendCodeDataSource{
         url: 'api/Auth/ResendMobileCode/$mobileId',
       query: {
         'isWhatsapp':isWhatsApp
-      }
+      },
+      data: {}
     );
     return ResendCodeModel.fromJson(result.data);
   }

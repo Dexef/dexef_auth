@@ -24,7 +24,7 @@ class RegisterRepoImp implements RegisterRepository {
     this.registerByGoogleDataSource,
     this.resendCodeDataSource,
     this.sendSmsDataSource,
-    this.signUpDataSource,
+    this.registerNormalDataSource,
     this.verifyCodeDataSource
   );
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +87,7 @@ class RegisterRepoImp implements RegisterRepository {
     }
   }
 ////////////////////////////////////////////////////////////////////////////////
-  final SignUpDataSource signUpDataSource;
+  final RegisterNormalDataSource registerNormalDataSource;
   @override
   Future<Either<Failure, RegisterNormalEntity>> registerNormal(
       String email,
@@ -97,7 +97,7 @@ class RegisterRepoImp implements RegisterRepository {
       String countryCode,
       String companyName) async {
     try {
-      return Right(await signUpDataSource.signUp(email, name, phoneNumber, password, countryCode, companyName));
+      return Right(await registerNormalDataSource.signUp(email, name, phoneNumber, password, countryCode, companyName));
     } catch (e) {
       debugPrint(e.toString());
       return Left(Failure(e.toString()));

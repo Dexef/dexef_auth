@@ -1,8 +1,7 @@
 import '../../../../core/rest/dio_helper.dart';
 import '../model/SignUpModel.dart';
 
-class SignUpDataSource{
-
+class RegisterNormalDataSource{
   Future<RegisterNormalModel> signUp(String email,String name,String phoneNumber,String password,String countryCode,String companyName) async {
     final result = await DioHelper.getPostData(
         // url: 'api/Auth/RegisterLandingPage',

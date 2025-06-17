@@ -1,20 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-// import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../core/class_constants/Routes.dart';
-import '../../../../../core/class_constants/app_constants_values.dart';
-import '../../../../../core/class_constants/constants_methods.dart';
 import '../../../../../core/size_widgets/app_screen_size.dart';
 import '../../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../../core/widgets/default_login_screen.dart';
-import '../../../../../core/widgets/default_text.dart';
 import '../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../style/colors/colors.dart';
-import '../../../../../utils/app_localizations.dart';
-import '../../../login/presentation/pages/1.login.dart';
 import 'dart:ui' as ui;
+
+import '../../../../core/rest/app_localizations.dart';
+import '../../../../core/rest/methods.dart';
+import '../../../../core/rest/routes.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/public/default_login_screen.dart';
+import '../../../../core/widgets/public/default_text.dart';
 
 class PasswordChangedSuccessful extends StatelessWidget {
   PasswordChangedSuccessful({super.key});

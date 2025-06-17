@@ -3,17 +3,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-
-import '../../../../../../core/class_constants/app_constants_values.dart';
-import '../../../../../../core/class_constants/constants_methods.dart';
 import '../../../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../../../core/widgets/default_text.dart';
-import '../../../../../../core/widgets/pop_up_menu_widget.dart';
 import '../../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../../style/colors/colors.dart';
-import '../../../../../../utils/app_localizations.dart';
-import '../../../../../../utils/cash_helper.dart';
-import '../../../../../../utils/constants.dart';
+import '../../rest/app_constants.dart';
+import '../../rest/app_localizations.dart';
+import '../../rest/cash_helper.dart';
+import '../../rest/constants.dart';
+import '../../rest/methods.dart';
+import '../../theme/colors.dart';
+import '../public/default_text.dart';
+import '../public/pop_up_menu_widget.dart';
 
 class LanguageSwitchWidget extends StatefulWidget {
   final BoxConstraints constraints;

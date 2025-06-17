@@ -4,26 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mydexef/core/class_constants/Routes.dart';
-import 'package:mydexef/core/arguments.dart';
-import 'package:mydexef/core/class_constants/constants_methods.dart';
-import 'package:mydexef/core/widgets/custom_round_button.dart';
-import 'package:mydexef/core/size_widgets/responsive_widget.dart';
-import 'package:mydexef/core/widgets/default_text.dart';
-import 'package:mydexef/core/size_widgets/app_font_style.dart';
-import 'package:mydexef/features/auth/presentation/cubit/reset_password/reset_password_state.dart';
-import 'package:mydexef/features/auth/presentation/cubit/verify_code/reset_verify_code.dart';
-import 'package:mydexef/locator.dart' as di;
-import 'package:mydexef/style/colors/colors.dart';
-import 'package:mydexef/utils/cash_helper.dart';
 import 'package:timer_count_down/timer_count_down.dart';
-import '../../../../../core/class_constants/app_constants_values.dart';
 import '../../../../../core/size_widgets/app_screen_size.dart';
-import '../../../../../core/widgets/default_login_screen.dart';
-import '../../../../../core/widgets/network_failed.dart';
-import '../../../../../utils/app_localizations.dart';
-import '../../../../../utils/constants.dart';
 import 'dart:ui' as ui;
+
+import '../../../../core/rest/app_constants.dart';
+import '../../../../core/rest/app_localizations.dart';
+import '../../../../core/rest/arguments.dart';
+import '../../../../core/rest/cash_helper.dart';
+import '../../../../core/rest/constants.dart';
+import '../../../../core/rest/methods.dart';
+import '../../../../core/rest/routes.dart';
+import '../../../../core/size_widgets/app_font_style.dart';
+import '../../../../core/size_widgets/responsive_widget.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/public/custom_round_button.dart';
+import '../../../../core/widgets/public/default_login_screen.dart';
+import '../../../../core/widgets/public/default_text.dart';
+import '../../../../core/widgets/public/network_failed.dart';
+import '../cubit/reset_password_cubit.dart';
+import '../cubit/reset_password_state.dart';
 
 class ResetPasswordVerifyCode extends StatefulWidget {
   const ResetPasswordVerifyCode({Key? key}) : super(key: key);
@@ -50,15 +50,13 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
   int userBlockCounter = 0;
   bool isCountDown = true;
   final formKey = GlobalKey<FormState>();
-
-  // ResetPasswordCubit? resetPasswordCubit;
   bool visibleContainer = false;
   dynamic location;
   bool isTap = false;
   double opacity = 0.0;
   Orientation? orientation;
   bool isValidCode = true;
-  ResetVerifyCodeCubit? resetVerifyCodeCubit;
+  late ResetPasswordCubit resetPasswordCubit;
   int mobileId = CacheHelper.getData(key: Constants.mobileId.toString());
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +99,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
-        resetVerifyCodeCubit?.checkDate();
+        ResetPasswordCubit.instance.checkDate();
         break;
       case AppLifecycleState.inactive:
         // resetVerifyCodeCubit?.checkDate();
@@ -119,7 +117,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
 
   @override
   void didChangeDependencies() {
-    resetVerifyCodeCubit?.checkDate();
+    ResetPasswordCubit.instance.checkDate();
     super.didChangeDependencies();
   }
 
@@ -133,72 +131,41 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
         key: Constants.verifyCodeSocialArguments.toString(),
         model: ArgumentsResetPasswordVerifyCode);
     int mobileId = CacheHelper.getData(key: Constants.mobileId.toString());
-    resetVerifyCodeCubit?.checkDate();
-    return BlocProvider(
-      create: (context) => di.locator<ResetVerifyCodeCubit>(),
-      child: BlocConsumer<ResetVerifyCodeCubit, ResetPasswordStates>(
-        listener: (context, state) {
-          if (state is VerifyForgetPasswordSuccess) {
-            //Fluttertoast.showToast(msg: 'Success');
-            //Navigator.of(context).pushNamedAndRemoveUntil(CreateNewPasswordScreen.route, (route) => false);
+    ResetPasswordCubit.instance.checkDate();
+    return BlocConsumer<ResetPasswordCubit, ResetPasswordStates>(
+      listener: (context, state) {
+        if (state is VerifyMobileForgetSuccess) {
+          CacheHelper.saveObjectToPrefs(
+              key: Constants.createNewPasswordArguments.toString(),
+              object: ArgumentsCreateNewPassword(
+                mobileID: args?.mobileID ?? mobileId,
+                code: "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
+              ));
 
-            CacheHelper.saveObjectToPrefs(
-                key: Constants.createNewPasswordArguments.toString(),
-                object: ArgumentsCreateNewPassword(
-                  mobileID: args?.mobileID ?? mobileId,
-                  code:
-                      "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                ));
-
-            Router.neglect(context, () {
-              context.go(Routes.createNewPasswordScreen);
-            });
-          } else if (state is VerifyForgetPasswordFailed) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title: AppLocalizations.of(context)!.translate('networkFailed'),
-            //     subTitle: getErrorMessage(state.message),
-            //     textColor: Colors.black);
-          } else if (state is VerifyForgetPasswordError) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title: AppLocalizations.of(context)!
-            //         .translate('resetPasswordFailed'),
-            //     subTitle: state.message,
-            //     textColor: Colors.black);
-          }
-          // else if (state is ResendCodeSuccess || state is VerifyForgetPasswordSuccess) {
-          //   resetVerifyCodeCubit?.checkDate();
-          // }
-        },
-        builder: (context, state) {
-          resetVerifyCodeCubit = ResetVerifyCodeCubit.get(context);
-          final size = MediaQuery.of(context).size;
-          return DefaultLoginScreen(
-            isLoading: state is LoadingStateVerifyCode || State is LoadingState,
-            body: args != null
-                // ? (isTap == true || (kIsWeb && MediaQuery.of(context).size.shortestSide < 600)) ||(orientation == Orientation.portrait)
-                ? _buildRow(size, state, args)
-                // : _buildStack(size, state, args)
-                : Center(child: NetworkFailed()),
-          );
-        },
-      ),
+          Router.neglect(context, () {
+            context.go(Routes.createNewPasswordScreen);
+          });
+        }
+      },
+      builder: (context, state) {
+        resetPasswordCubit = ResetPasswordCubit.instance;
+        final size = MediaQuery.of(context).size;
+        return DefaultLoginScreen(
+          isLoading: state is VerifyMobileForgetLoading,
+          body: args != null ? _buildRow(size, state, args) : const Center(child: NetworkFailed()),
+        );
+      },
     );
   }
 
 ////////////////////////////////////////////////////////////////////////////////
-  Widget _buildRow(var size, ResetPasswordStates state,
-          ArgumentsResetPasswordVerifyCode args) =>
+  Widget _buildRow(var size, ResetPasswordStates state, ArgumentsResetPasswordVerifyCode args) =>
       AbsorbPointer(
-        absorbing: state is LoadingState || state is LoadingStateVerifyCode,
+        absorbing: state is VerifyMobileForgetLoading,
         child: Row(
           children: [
             Container(
-              width:
-                  size.width - AppScreenSize.appWidgetSize.getLoginRightPanelWidth(context),
+              width: size.width - AppScreenSize.appWidgetSize.getLoginRightPanelWidth(context),
               height: MediaQuery.of(context).size.height,
               decoration: BoxDecoration(color: cloudBackground, boxShadow: [
                 BoxShadow(
@@ -362,11 +329,11 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                   onFieldSubmitted: (_) {
                                     if (formKey.currentState!.validate()) {
                                       setState(() {
-                                        resetVerifyCodeCubit?.errorMessage = '';
+                                        resetPasswordCubit.errorMessage = '';
                                       });
                                       print(
                                           'aaaaaaaa${args.mobileID == 0 || args.mobileID == null ? mobileId : args.mobileID}');
-                                      resetVerifyCodeCubit?.verifyForgetPassword(
+                                      resetPasswordCubit.verifyForgetPassword(
                                           code:
                                               "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
                                           mobileID: args.mobileID == 0 ||
@@ -416,11 +383,11 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                   onFieldSubmitted: (_) {
                                     if (formKey.currentState!.validate()) {
                                       setState(() {
-                                        resetVerifyCodeCubit?.errorMessage = '';
+                                        resetPasswordCubit.errorMessage = '';
                                       });
                                       print(
                                           'aaaaaaaa${args.mobileID == 0 || args.mobileID == null ? mobileId : args.mobileID}');
-                                      resetVerifyCodeCubit?.verifyForgetPassword(
+                                      resetPasswordCubit.verifyForgetPassword(
                                           code:
                                               "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
                                           mobileID: args.mobileID == 0 ||
@@ -471,11 +438,11 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                   onFieldSubmitted: (_) {
                                     if (formKey.currentState!.validate()) {
                                       setState(() {
-                                        resetVerifyCodeCubit?.errorMessage = '';
+                                        resetPasswordCubit.errorMessage = '';
                                       });
                                       print(
                                           'aaaaaaaa${args.mobileID == 0 || args.mobileID == null ? mobileId : args.mobileID}');
-                                      resetVerifyCodeCubit?.verifyForgetPassword(
+                                      resetPasswordCubit.verifyForgetPassword(
                                           code:
                                               "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
                                           mobileID: args.mobileID == 0 ||
@@ -524,11 +491,11 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                   onFieldSubmitted: (_) {
                                     if (formKey.currentState!.validate()) {
                                       setState(() {
-                                        resetVerifyCodeCubit?.errorMessage = '';
+                                        resetPasswordCubit.errorMessage = '';
                                       });
                                       print(
                                           'aaaaaaaa${args.mobileID == 0 || args.mobileID == null ? mobileId : args.mobileID}');
-                                      resetVerifyCodeCubit?.verifyForgetPassword(
+                                      resetPasswordCubit.verifyForgetPassword(
                                           code:
                                               "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
                                           mobileID: args.mobileID == 0 ||
@@ -565,11 +532,11 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                   onFieldSubmitted: (_) {
                                     if (formKey.currentState!.validate()) {
                                       setState(() {
-                                        resetVerifyCodeCubit?.errorMessage = '';
+                                        resetPasswordCubit.errorMessage = '';
                                       });
                                       print(
                                           'aaaaaaaa${args.mobileID == 0 || args.mobileID == null ? mobileId : args.mobileID}');
-                                      resetVerifyCodeCubit?.verifyForgetPassword(
+                                      resetPasswordCubit.verifyForgetPassword(
                                           code:
                                               "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
                                           mobileID: args.mobileID == 0 ||
@@ -605,7 +572,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                               ? ratioWidthComponentLogin
                               : 0.8,
                           child: DefaultText(
-                            text: resetVerifyCodeCubit?.errorMessage ?? '',
+                            text:resetPasswordCubit.errorMessage ?? '',
                             isTextTheme: true,
                             themeStyle: Theme.of(context)
                                 .textTheme
@@ -652,7 +619,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                               : 0.8,
                           fixedHeight: 48,
                           child: CustomRoundedButton(
-                              isLoading: state is LoadingStateVerifyCode,
+                              isLoading: state is VerifyMobileForgetLoading,
                               title: args.isFromGoogle == true ||
                                       args.isFromFacebook == true
                                   ? AppLocalizations.of(context)!
@@ -662,7 +629,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                               onPressed: () {
                                 if (formKey.currentState!.validate()) {
                                   setState(() {
-                                    resetVerifyCodeCubit?.errorMessage = '';
+                                    resetPasswordCubit.errorMessage = '';
                                   });
                                   // isValidCode = true;
                                   // print(args.mobileID);
@@ -690,7 +657,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                   // }
                                   print(
                                       'aaaaaaaa${args.mobileID == 0 || args.mobileID == null ? mobileId : args.mobileID}');
-                                  resetVerifyCodeCubit?.verifyForgetPassword(
+                                  resetPasswordCubit.verifyForgetPassword(
                                       code:
                                           "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
                                       mobileID: args.mobileID == 0 ||
@@ -737,10 +704,10 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                             children: [
                               MouseRegion(
                                 cursor: SystemMouseCursors.click,
-                                child: resetVerifyCodeCubit?.differenceTime !=
+                                child: resetPasswordCubit.differenceTime !=
                                         Duration.zero
                                     ? Countdown(
-                                        seconds: resetVerifyCodeCubit!
+                                        seconds: resetPasswordCubit
                                             .differenceTime!.inSeconds,
                                         build: (BuildContext context,
                                             double time) {
@@ -785,7 +752,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                         },
                                         interval: Duration(seconds: 1),
                                         onFinished: () {
-                                          resetVerifyCodeCubit?.defaultDate();
+                                          resetPasswordCubit.defaultDate();
                                           // setState(() {
                                           //   verifyCodeCubit?.differenceTime = Duration.zero;
                                           // });
@@ -799,7 +766,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                         splashColor: Colors.transparent,
                                         // Removes the splash color
 
-                                        onTap: state is LoadingState
+                                        onTap: state is ResendForgetPasswordLoading
                                             ? () {}
                                             : () {
                                                 codeControllerOne.clear();
@@ -807,8 +774,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                                 codeControllerThree.clear();
                                                 codeControllerFour.clear();
                                                 codeControllerFive.clear();
-                                                resetVerifyCodeCubit
-                                                    ?.resendCodeSms(
+                                                resetPasswordCubit.resendCodeSms(
                                                         mobileId: args.mobileID ==
                                                                     0 ||
                                                                 args.mobileID ==
@@ -1262,7 +1228,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                             localWidthRatio: ratioWidthComponentLogin,
                             fixedHeight: 48,
                             child: CustomRoundedButton(
-                                isLoading: state is LoadingStateVerifyCode,
+                                isLoading: state is VerifyMobileForgetLoading,
                                 title: args.isFromGoogle == true ||
                                         args.isFromFacebook == true
                                     ? AppLocalizations.of(context)!
@@ -1296,7 +1262,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                     //       mobileID: args.mobileID!);
                                     // }
 
-                                    resetVerifyCodeCubit?.verifyForgetPassword(
+                                    resetPasswordCubit.verifyForgetPassword(
                                         code:
                                             "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
                                         mobileID: args.mobileID!);
@@ -1355,7 +1321,7 @@ class _ResetPasswordVerifyCodeState extends State<ResetPasswordVerifyCode>
                                         codeControllerThree.clear();
                                         codeControllerFour.clear();
                                         codeControllerFive.clear();
-                                        resetVerifyCodeCubit?.resendCodeSms(
+                                        resetPasswordCubit.resendCodeSms(
                                             mobileId: args.mobileID!.toInt());
                                         isCountDown = true;
                                       }

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:auth_dexef/locator.dart' as di;
 import 'package:intl_phone_field/phone_number.dart';
@@ -33,6 +34,7 @@ import '../../../../core/widgets/public/network_failed.dart';
 import '../cubit/login_cubit.dart';
 import '../cubit/login_state.dart';
 import 'dart:ui' as ui;
+import 'dart:html' as html;
 
 
 class LoginScreen extends StatefulWidget {
@@ -76,11 +78,11 @@ class _LoginScreenState extends State<LoginScreen> {
       ? LoginCubit.instance.appleCredential?.user?.email!
       : phoneController.text;
     checkRememberMe();
-    _updateImagePath();
+    updateImagePath();
     super.initState();
   }
 ////////////////////////////////////////////////////////////////////////////////
-  void _updateImagePath() {
+  void updateImagePath() {
     imagePath = LoginCubit.instance.loginType == null
       ? 'images/login_first.png'
       : LoginCubit.instance.loginType == AppConstants.normalString
@@ -153,17 +155,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   getLanguageCode(context) == 'en' ? const SizedBox(height: 14,) : const SizedBox(height: 10,),
                                   Visibility(
-                                    visible: loginCubit.loginType == AppConstants.googleString
-                                        || loginCubit.loginType == AppConstants.appleString,
+                                    visible: loginCubit.loginType == AppConstants.googleString || loginCubit.loginType == AppConstants.appleString,
                                     child: PreviousSignSocialWidget(
                                       state: state,
-                                      emailType: loginCubit.loginType ?? "",
+                                      loginType: loginCubit.loginType ?? "",
                                       loginCubit: loginCubit,
                                       phoneText: phoneController.text,
                                     ),
                                   ),
                                   Visibility(
-                                    visible: loginCubit.loginType == AppConstants.normalString && loginCubit.writePassword == true,
+                                    visible: loginCubit.loginType == AppConstants.normalString,
                                     child: PasswordLoginWidget(
                                       loginCubit: loginCubit,
                                       state: state,
@@ -181,20 +182,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       children: [
                                         const HaveAccountWidget(),
                                         const SizedBox(height: 44),
-                                        loginCubit.writePassword == false ? EmailLoginWidget(
+                                        EmailLoginWidget(
                                           phoneOrEmail: phoneController,
                                           formKey: formKey,
                                           state: state,
                                           loginCubit: loginCubit,
                                           emailFocusNode: emailFocusNode,
-                                        ): PasswordLoginWidget(
-                                          loginCubit: loginCubit,
-                                          state: state,
-                                          formKey: formKey,
-                                          passwordController: passwordController,
-                                          passwordFocusNode: passwordFocusNode,
-                                          phoneOrEmail: phoneOrEmail,
-                                          rememberMeChecker: rememberMeChecker,
                                         ),
                                         const SizedBox(height: 20),
                                         Center(
@@ -215,8 +208,22 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                         const SizedBox(height: 20),
                                         SocialButtonWidget(
-                                          loginCubit: loginCubit!,
-                                          state: state,
+                                          googleButtonColor: state is SignInWithGoogleWebLoading || state is LoginWithGoogleLoading || state is SignInWithGoogleMobileLoading
+                                              ? opacityGoogle
+                                              : Colors.white,
+                                          appleButtonColor:  state is LoginWithAppleLoading || state is SignInAppleLoadingFirebase ? opacityGoogle : Colors.white,
+                                          googleButtonTap: state is LoginWithGoogleLoading || state is SignInWithGoogleMobileLoading || state is SignInWithGoogleWebLoading ? null : () async {
+                                            if (kIsWeb) {
+                                              loginCubit.errorMessage = null;
+                                              loginCubit.signInWithGoogleWeb(true);
+                                            } else {
+                                              loginCubit.signInWithGoogle();
+                                            }
+                                          },
+                                          appleButtonTap: state is LoginWithAppleLoading || state is SignInAppleLoadingFirebase? null : () async {
+                                            loginCubit.errorMessage = null;
+                                            loginCubit.signInWithAppleWeb(context);
+                                          },
                                         ),
                                       ],
                                     ),
@@ -243,7 +250,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (state is LoginWithGoogleSuccess) {
       CacheHelper.saveData(key: Constants.isLoggedFromGoogle.toString(), value: true);
       Navigator.pop(context);
-      goHome();
       loginCubit.isLoading = false;
     } else if (state is LoginWithGoogleError) {
       loginCubit.validateEmailNormal(loginCubit.credGoogleWeb!.user!.email!);
@@ -290,8 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 ////////////////////////////////////////////////////////////////////////////////
   getListenerForApple(LoginCubit loginCubit, LoginState state) {
-    if (state is SignInAppleSuccessFirebase) {
-      loginCubit.loginWithApple(token: loginCubit.idToken!);
+    if (state is LoginWithAppleSuccess) {
       CacheHelper.saveData(key: Constants.appleToken.toString(), value: '${loginCubit.idToken}');
       context.go(Routes.verifyPhoneNumber);
       CacheHelper.saveObjectToPrefs(
@@ -323,31 +328,21 @@ class _LoginScreenState extends State<LoginScreen> {
     if (state is LoginSuccess) {
       CacheHelper.saveData(key: Constants.isLoggedFromGoogle.toString(), value: false);
       CacheHelper.saveData(key: Constants.isLoggedFromApple.toString(), value: false);
+      Fluttertoast.showToast(msg: "login Success");
+      html.window.close();
     } else if (state is LoginError) {
       isLoadingLogin = false;
-    }
-  }
-////////////////////////////////////////////////////////////////////////////////
-  void goHome() {
-    if (CacheHelper.getData(key: Constants.appUrlIfNotLoggedIn.toString()) == '' ||
-        CacheHelper.getData(key: Constants.appUrlIfNotLoggedIn.toString()) == null) {
-      // Router.neglect(context, () {context.go(Routes.homePage);});
-    } else {
-      Router.neglect(context, () {
-        context.go(CacheHelper.getData(key: Constants.appUrlIfNotLoggedIn.toString()));
-      });
     }
   }
 ////////////////////////////////////////////////////////////////////////////////
   getListenerForValidate(LoginCubit loginCubit, LoginState state){
     if (state is ValidateEmailSuccess) {
       if(state.validateEmailEntity?.data?.customerStatus == null){
-        loginCubit.loginType = loginCubit.validateEmailEntity?.data?.type ?? CacheHelper.getData(key: Constants.emailType.toString());
         phoneOrEmail = loginCubit.loginType == AppConstants.googleString
             ? loginCubit.credGoogleWeb!.user!.email!
             : loginCubit.loginType == AppConstants.appleString
             ? loginCubit.appleCredential!.user!.email : phoneController.text;
-        _updateImagePath();
+        updateImagePath();
       }else{
         Router.neglect(context,()=> context.go(Routes.verifyCodeSocial));
         CacheHelper.saveObjectToPrefs(

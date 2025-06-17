@@ -49,7 +49,6 @@ class LoginCubit extends Cubit<LoginState> {
   String? loginType;
   ValidateEmailEntity? validateEmailEntity;
   validateEmail({required String userName}) async {
-    loginType = null;
     isLoading = true;
     emit(ValidateEmailLoading());
     final result = await validateEmailUseCase(userName);
@@ -59,6 +58,7 @@ class LoginCubit extends Cubit<LoginState> {
       emit(ValidateEmailFailure(failure.errorMessage));
     },(validate) {
       if (validate.isSuccess == true) {
+        loginType = null;
         validateEmailEntity = validate;
         if(validateEmailEntity?.data?.type != null && validateEmailEntity?.data?.type != ""){
           loginType = validateEmailEntity?.data?.type;
@@ -229,7 +229,9 @@ class LoginCubit extends Cubit<LoginState> {
       credGoogle = await FirebaseAuth.instance.signInWithCredential(credentialGoogle!);
       debugPrint('Sign in With Google Success');
       isLoading = false;
-      emit(SignInWithGoogleMobileSuccess());
+      if(googleAuth?.accessToken != null){
+        loginWithGoogle(token: "${googleAuth?.accessToken}");
+      }
     } catch (e) {
       log('error is ${e.toString()}');
       errorMessage = e.toString();
@@ -252,7 +254,9 @@ class LoginCubit extends Cubit<LoginState> {
       googleProvider.setCustomParameters({'prompt': 'select_account'});
       credGoogleWeb = await FirebaseAuth.instance.signInWithPopup(googleProvider);
       isLoading = false;
-      emit(SignInWithGoogleWebSuccess());
+      if(credGoogleWeb?.credential?.accessToken != null){
+        loginWithGoogle(token: credGoogleWeb!.credential!.accessToken!);
+      }
     }catch(e){
       errorMessage = e.toString();
       log('${e.hashCode} Error Google web is ${e.toString()}');
@@ -317,7 +321,7 @@ class LoginCubit extends Cubit<LoginState> {
 ///////////////////////////////////////////////////////////////////////////////////////////////
   UserCredential? appleCredential;
   String? idToken;
-  signInWithAppleWeb() async {
+  signInWithAppleWeb(BuildContext context) async {
     isLoading = true;
     emit(SignInAppleLoadingFirebase());
     try {
@@ -325,7 +329,9 @@ class LoginCubit extends Cubit<LoginState> {
       appleCredential = await FirebaseAuth.instance.signInWithPopup(provider);
       idToken = await appleCredential?.user?.getIdToken();
       isLoading = false;
-      emit(SignInAppleSuccessFirebase());
+      if(idToken != null){
+        loginWithApple(token: idToken!, context: context);
+      }
     } catch (e) {
       debugPrint("error apple =  $e");
       isLoading = false;

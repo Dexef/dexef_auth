@@ -1,8 +1,12 @@
 import 'package:auth_dexef/core/rest/error_model.dart';
 
 import '../../../login/domain/entity/validate_email_entity.dart';
+import '../../domain/entity/change_mobile_entity.dart';
+import '../../domain/entity/register_apple_entity.dart';
 import '../../domain/entity/register_google_entity.dart';
 import '../../domain/entity/resend_code_entity.dart';
+import '../../domain/entity/send_sms_entity.dart';
+import '../../domain/entity/verify_code_entity.dart';
 
 abstract class RegisterStates{}
 
@@ -35,32 +39,6 @@ class RegisterGoogleError extends RegisterStates{
   String? message;
   RegisterGoogleError(this.message);
 }
-////////////////////////////////////////////////////////////////////////////////
-// class SignUpSuccess extends RegisterStates{
-//   int mobileID;
-//   SignUpSuccess(this.mobileID);
-// }
-//
-// class SignUpFailed extends RegisterStates{
-//   String message;
-//   List<Errors> signUpErrors;
-//   SignUpFailed(this.message,this.signUpErrors);
-// }
-// class SignUpUnSuccess extends RegisterStates{
-//   String message;
-//   SignUpUnSuccess(this.message);
-// }
-
-class ConfirmEmailSuccess extends RegisterStates{}
-
-class ConfirmEmailFailed extends RegisterStates{}
-
-class NetworkError extends RegisterStates{
-  String message;
-  NetworkError(this.message);
-}
-
-class LoadingState extends RegisterStates{}
 //////////////////////////////////////////////////////////////////////////////// sign Up with google
 class SignUpGoogleSuccess extends RegisterStates{}
 
@@ -90,25 +68,7 @@ class SignOutGoogleLoading extends RegisterStates{}
 class SignOutGoogleSuccess extends RegisterStates{}
 
 class SignOutGoogleError extends RegisterStates{}
-//////////////////////////////////////////////////////////////////////////////// sign up facebook android
-class SignUpFaceBookLoading extends RegisterStates{}
-
-class SignUpFaceBookSuccess extends RegisterStates{}
-
-class SignUpFaceBookError extends RegisterStates{
-  String? message;
-  SignUpFaceBookError({this.message});
-}
-//////////////////////////////////////////////////////////////////////////////// sign up facebook web
-class SignUpFaceBookWebLoading extends RegisterStates{}
-
-class SignUpFaceBookWebSuccess extends RegisterStates{
-}
-
-class SignUpFaceBookWebError extends RegisterStates{
-  String? message;
-  SignUpFaceBookWebError({this.message});
-}
+////////////////////////////////////////////////////////////////////////////////
 
 class ChangePasswordVisible extends RegisterStates{}
 
@@ -144,3 +104,58 @@ class ResendCodeFailure extends RegisterStates{
   ResendCodeFailure(this.message);
 }
 ////////////////////////////////////////////////////////////////////////////////
+class SendCodeLoading extends RegisterStates{}
+class SendCodeSuccess extends RegisterStates{
+  SendSmsEntity sendSmsEntity;
+  SendCodeSuccess(this.sendSmsEntity);
+}
+class SendCodeError extends RegisterStates{
+  String? message;
+  SendCodeError(this.message);
+}
+class SendCodeFailure extends RegisterStates{
+  String? message;
+  SendCodeFailure(this.message);
+}
+////////////////////////////////////////////////////////////////////////////////
+class VerifyMobileLoading extends RegisterStates{}
+class VerifyMobileSuccess extends RegisterStates{
+  VerifyCodeEntity verifyCodeEntity;
+  VerifyMobileSuccess(this.verifyCodeEntity);
+}
+class VerifyMobileError extends RegisterStates{
+  String? message;
+  VerifyMobileError(this.message);
+}
+class VerifyMobileFailure extends RegisterStates{
+  String? message;
+  VerifyMobileFailure(this.message);
+}
+////////////////////////////////////////////////////////////////////////////////
+class ChangeMobileLoading extends RegisterStates{}
+class ChangeMobileSuccess extends RegisterStates{
+  ChangeMobileEntity changeMobileEntity;
+  ChangeMobileSuccess(this.changeMobileEntity);
+}
+class ChangeMobileError extends RegisterStates{
+  String? message;
+  ChangeMobileError(this.message);
+}
+class ChangeMobileFailure extends RegisterStates{
+  String? message;
+  ChangeMobileFailure(this.message);
+}
+////////////////////////////////////////////////////////////////////////////////
+class RegisterAppleLoading extends RegisterStates{}
+class RegisterAppleSuccess extends RegisterStates{
+  RegisterAppleEntity registerAppleEntity;
+  RegisterAppleSuccess(this.registerAppleEntity);
+}
+class RegisterAppleFailure extends RegisterStates{
+  String? message;
+  RegisterAppleFailure(this.message);
+}
+class RegisterAppleError extends RegisterStates{
+  String? message;
+  RegisterAppleError(this.message);
+}

@@ -1,71 +1,70 @@
 
+import '../../../register/domain/entity/resend_code_entity.dart';
 import '../../domain/entity/create_new_password_entity.dart';
+import '../../domain/entity/reset_password_entity.dart';
+import '../../domain/entity/verify_forget_password_entity.dart';
+import '../../domain/useCase/verify_forget_pass_use_case.dart';
 
 abstract class ResetPasswordStates{}
 
 class ResetPasswordInitialState extends ResetPasswordStates{}
-
-class ResetPasswordSuccess extends ResetPasswordInitialState{
-  int mobileID;
-  ResetPasswordSuccess(this.mobileID);
-}
-
-class ResetPasswordFailed extends ResetPasswordInitialState{
-  String message;
-  ResetPasswordFailed(this.message);
-}
-
-class ResetPasswordError extends ResetPasswordInitialState{
-  String message;
-  ResetPasswordError(this.message);
-}
-class LoadingStateVerifyCode extends ResetPasswordInitialState{}
-
-class LoadingState extends ResetPasswordInitialState{}
-
-class VerifyForgetPasswordSuccess extends ResetPasswordInitialState{}
-
-class VerifyForgetPasswordFailed extends ResetPasswordInitialState{
-  String message;
-  VerifyForgetPasswordFailed(this.message);
-}
-class VerifyForgetPasswordError extends ResetPasswordInitialState{
-  String message;
-  VerifyForgetPasswordError(this.message);
-}
-
-
-class ResendCodeSuccess extends ResetPasswordInitialState{}
-
-class ResendCodeFailed extends ResetPasswordInitialState{
-  String message;
-  ResendCodeFailed(this.message);
-}
-
-class VerifyCodeFailed extends ResetPasswordInitialState{
-  String message;
-  VerifyCodeFailed(this.message);
-}
-class VerifyCodeError extends ResetPasswordInitialState{
-  String message;
-  VerifyCodeError(this.message);
-}
-
-class CheckDifferenceState extends ResetPasswordInitialState{}
-
-class RemoveDateState extends ResetPasswordInitialState{}
 ////////////////////////////////////////////////////////////////////////////////
-class CreateNewPasswordLoading extends ResetPasswordInitialState{}
-class CreateNewPasswordFailure extends ResetPasswordInitialState{
-  String message;
+class CreateNewPasswordLoading extends ResetPasswordStates{}
+class CreateNewPasswordFailure extends ResetPasswordStates{
+  String? message;
   CreateNewPasswordFailure(this.message);
 }
-class CreateNewPasswordSuccess extends ResetPasswordInitialState{
+class CreateNewPasswordSuccess extends ResetPasswordStates{
   CreateNewPasswordEntity createNewPasswordEntity;
   CreateNewPasswordSuccess(this.createNewPasswordEntity);
 }
-class CreateNewPasswordError extends ResetPasswordInitialState{
-  CreateNewPasswordEntity createNewPasswordEntity;
-  CreateNewPasswordError(this.createNewPasswordEntity);
+class CreateNewPasswordError extends ResetPasswordStates{
+  String? message;
+  CreateNewPasswordError(this.message);
 }
+////////////////////////////////////////////////////////////////////////////////
+class ResendForgetPasswordLoading extends ResetPasswordStates{}
+class ResendForgetPasswordFailure extends ResetPasswordStates{
+  String? message;
+  ResendForgetPasswordFailure(this.message);
+}
+class ResendForgetPasswordSuccess extends ResetPasswordStates{
+  ResendCodeEntity resendCodeEntity;
+  ResendForgetPasswordSuccess(this.resendCodeEntity);
+}
+class ResendForgetPasswordError extends ResetPasswordStates{
+  String? message;
+  ResendForgetPasswordError(this.message);
+}
+////////////////////////////////////////////////////////////////////////////////
+class ResetPasswordLoading extends ResetPasswordStates{}
+class ResetPasswordFailure extends ResetPasswordStates{
+  String? message;
+  ResetPasswordFailure(this.message);
+}
+class ResetPasswordSuccess extends ResetPasswordStates{
+  ResetPasswordEntity resetPasswordEntity;
+  ResetPasswordSuccess(this.resetPasswordEntity);
+}
+class ResetPasswordError extends ResetPasswordStates{
+  String? message;
+  ResetPasswordError(this.message);
+}
+////////////////////////////////////////////////////////////////////////////////
+class VerifyMobileForgetLoading extends ResetPasswordStates{}
+class VerifyMobileForgetFailure extends ResetPasswordStates{
+  String? message;
+  VerifyMobileForgetFailure(this.message);
+}
+class VerifyMobileForgetSuccess extends ResetPasswordStates{
+  VerifyForgetPasswordEntity verifyForgetPasswordEntity;
+  VerifyMobileForgetSuccess(this.verifyForgetPasswordEntity);
+}
+class VerifyMobileForgetError extends ResetPasswordStates{
+  String? message;
+  VerifyMobileForgetError(this.message);
+}
+////////////////////////////////////////////////////////////////////////////////
+class CheckDifferenceState extends ResetPasswordStates{}
+class RemoveDateState extends ResetPasswordStates{}
 ////////////////////////////////////////////////////////////////////////////////

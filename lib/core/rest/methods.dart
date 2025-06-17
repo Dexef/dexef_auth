@@ -97,7 +97,23 @@ getErrorMessage(String apiMessage){
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
-
+String enforceLTRForNumbers(String text) {
+  // Regular expression to find numbers
+  final regex = RegExp(r'\d+');
+  return text.replaceAllMapped(regex, (match) {
+    return '\u200E${match.group(0)}\u200E';
+  });
+}
+////////////////////////////////////////////////////////////////////////////////
+getLocation(bool value) {
+  dynamic location;
+  if (value) {
+    location = const Offset(1, 0);
+  } else {
+    location = const Offset(0, 0);
+  }
+  return location;
+}
 
 
 

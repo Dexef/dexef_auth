@@ -63,6 +63,7 @@ dependencies:
   provider:
   sentry_flutter: ^8.10.1
   intl_phone_number_input:
+  timer_count_down:
 
 dev_dependencies:
   flutter_test:

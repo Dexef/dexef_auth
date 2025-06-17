@@ -3,29 +3,27 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mydexef/core/class_constants/Routes.dart';
-import 'package:mydexef/core/arguments.dart';
-import 'package:mydexef/core/class_constants/constants_methods.dart';
-import 'package:mydexef/core/widgets/alert_dialog.dart';
-import 'package:mydexef/core/widgets/custom_round_button.dart';
-import 'package:mydexef/core/widgets/custom_text_field.dart';
-import 'package:mydexef/core/size_widgets/responsive_widget.dart';
-import 'package:mydexef/core/widgets/default_text.dart';
-import 'package:mydexef/core/size_widgets/app_font_style.dart';
-import 'package:mydexef/features/auth/presentation/cubit/reset_password/reset_password_cubit.dart';
-import 'package:mydexef/features/auth/presentation/cubit/reset_password/reset_password_state.dart';
-import 'package:mydexef/locator.dart' as di;
-import 'package:mydexef/style/colors/colors.dart';
-import 'package:mydexef/utils/cash_helper.dart';
-import 'package:mydexef/utils/regex.dart';
-import '../../../../../core/class_constants/app_constants_values.dart';
 import '../../../../../core/size_widgets/app_screen_size.dart';
-import '../../../../../core/widgets/default_login_screen.dart';
-import '../../../../../utils/app_localizations.dart';
-import '../../../../../utils/constants.dart';
 import 'dart:ui' as ui;
+
+import '../../../../core/rest/app_constants.dart';
+import '../../../../core/rest/app_localizations.dart';
+import '../../../../core/rest/arguments.dart';
+import '../../../../core/rest/cash_helper.dart';
+import '../../../../core/rest/constants.dart';
+import '../../../../core/rest/methods.dart';
+import '../../../../core/rest/regex.dart';
+import '../../../../core/rest/routes.dart';
+import '../../../../core/size_widgets/app_font_style.dart';
+import '../../../../core/size_widgets/responsive_widget.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/public/custom_round_button.dart';
+import '../../../../core/widgets/public/custom_text_field.dart';
+import '../../../../core/widgets/public/default_login_screen.dart';
+import '../../../../core/widgets/public/default_text.dart';
+import '../cubit/reset_password_cubit.dart';
+import '../cubit/reset_password_state.dart';
 
 class ResetPassword extends StatefulWidget {
   const ResetPassword({Key? key}) : super(key: key);
@@ -74,47 +72,23 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
   @override
   Widget build(BuildContext context) {
     orientation = MediaQuery.of(context).orientation;
-    return BlocProvider(
-      create: (context) => di.locator<ResetPasswordCubit>(),
-      child: BlocConsumer<ResetPasswordCubit, ResetPasswordStates>(
-        listener: (context, state) {
-          if (state is ResetPasswordSuccess) {
-            //Fluttertoast.showToast(msg: 'Success');
-            //Navigator.of(context).pushNamed(ResetPasswordVerifyCode.route);
-            // context.go(Routes.resetPasswordVerifyCode);
-
-            CacheHelper.saveData(key: Constants.mobileId.toString(), value: (state.mobileID));
-          } else if (state is ResetPasswordFailed) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title: AppLocalizations.of(context)!.translate('networkFailed'),
-            //     subTitle: getErrorMessage(state.message),
-            //     textColor: Colors.black);
-          } else if (state is ResetPasswordError) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title: AppLocalizations.of(context)!.translate('resetPasswordFailed'),
-            //     subTitle: state.message,
-            //     textColor: Colors.black);
-          }
-        },
-        builder: (context, state) {
-          resetPasswordCubit = ResetPasswordCubit.get(context);
-          final size = MediaQuery.of(context).size;
-          return Directionality(
-            textDirection: ui.TextDirection.ltr,
-            child: DefaultLoginScreen(
-              isLoading: state is LoadingState,
-              body:
-              // (isTap == true || (kIsWeb && MediaQuery.of(context).size.shortestSide < 600)) || (orientation == Orientation.portrait) ?
-              _buildRow(size, state)
-                  // : _buildStack(size, state),
-            ),
-          );
-        },
-      ),
+    return BlocConsumer<ResetPasswordCubit, ResetPasswordStates>(
+      listener: (context, state) {
+        if (state is ResetPasswordSuccess) {
+          CacheHelper.saveData(key: Constants.mobileId.toString(), value: (state.resetPasswordEntity.data?.mobileId));
+        }
+      },
+      builder: (context, state) {
+        resetPasswordCubit = ResetPasswordCubit.get(context);
+        final size = MediaQuery.of(context).size;
+        return Directionality(
+          textDirection: ui.TextDirection.ltr,
+          child: DefaultLoginScreen(
+            isLoading: state is ResetPasswordLoading,
+            body: _buildRow(size, state)
+          ),
+        );
+      },
     );
   }
 
@@ -122,10 +96,9 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
   Widget _buildRow(var size, ResetPasswordStates state) => Row(
     children: [
       AbsorbPointer(
-        absorbing: state is LoadingState || state is LoadingStateVerifyCode,
+        absorbing: state is ResetPasswordLoading,
         child: Container(
-          width: size.width -
-              AppScreenSize.appWidgetSize.getLoginRightPanelWidth(context),
+          width: size.width - AppScreenSize.appWidgetSize.getLoginRightPanelWidth(context),
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(color: cloudBackground, boxShadow: [
             BoxShadow(
@@ -201,7 +174,7 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
         width: AppScreenSize.appWidgetSize.getLoginRightPanelWidth(context),
         child: Center(
           child: ResponsiveWidget(
-            localWidthRatio: MediaQuery.of(context).size.width > AppConstants.minimumScreenSize ? ratioWidthComponentLogin : 1,
+            localWidthRatio: MediaQuery.of(context).size.width > 1280 ? ratioWidthComponentLogin : 1,
             startPadding: 24,
             endPadding: 24,
             child: Form(
@@ -304,7 +277,7 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                       fixedHeight: 48,
                       child: CustomRoundedButton(
                           title: AppLocalizations.of(context)!.translate('next'),
-                          isLoading: state is LoadingState,
+                          isLoading: state is ResetPasswordLoading,
                           onPressed: () {
                             if(formKey.currentState!.validate()){
                               CacheHelper.saveObjectToPrefs(key: Constants.verifyCodeSocialArguments.toString(),
@@ -453,7 +426,7 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                         fixedHeight: 48,
                         child: CustomRoundedButton(
                             title:  AppLocalizations.of(context)!.translate('next'),
-                            isLoading: state is LoadingState,
+                            isLoading: state is ResetPasswordLoading,
                             onPressed: () {
                               context.go(Routes.verifyCodeResetPassword);
                               // navigateTo(context, ResetPasswordVerifyCode());

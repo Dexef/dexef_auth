@@ -1,24 +1,29 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:gap/gap.dart';
-import 'package:mydexef/features/auth/presentation/cubit/1.login_cubit/login_cubit.dart';
-import 'package:mydexef/features/auth/presentation/cubit/1.login_cubit/login_state.dart';
-import '../../../../../../core/class_constants/constants_methods.dart';
-import '../../../../../../core/firebase_authentication.dart';
-import '../../../../../../core/widgets/default_text.dart';
 import '../../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../../style/colors/colors.dart';
-import '../../../../../../utils/app_localizations.dart';
+import '../../../features/login/presentation/cubit/login_cubit.dart';
+import '../../../features/login/presentation/cubit/login_state.dart';
+import '../../rest/app_localizations.dart';
+import '../../rest/firebase_auth.dart';
+import '../../rest/methods.dart';
+import '../../theme/colors.dart';
+import '../public/default_text.dart';
 
 class SocialButtonWidget extends StatelessWidget {
-  final LoginState state;
-  final LoginCubit loginCubit;
+  final void Function()? googleButtonTap;
+  final void Function()? appleButtonTap;
+  final Color? googleButtonColor;
+  final Color? appleButtonColor;
+
   const SocialButtonWidget({
     super.key,
-    required this.state,
-    required this.loginCubit
+    this.googleButtonTap,
+    this.appleButtonTap,
+    this.googleButtonColor,
+    this.appleButtonColor
   });
+
   @override
   Widget build(BuildContext context) {
     return  Row(
@@ -28,19 +33,7 @@ class SocialButtonWidget extends StatelessWidget {
             hoverColor: Colors.transparent,
             highlightColor: Colors.transparent,  // Removes the background highlight color
             splashColor: Colors.transparent,     // Removes the splash color
-            onTap: state is LoginWithGoogleLoading || state is SignInWithGoogleLoading || state is SignInWithGoogleWebLoading ? null : () async {
-              if (kIsWeb) {
-                loginCubit.errorMessage = null;
-                loginCubit.signInWithGoogleWeb().then((value) {
-                  if (loginCubit.credGoogleWeb?.credential?.accessToken != null) {
-                    loginCubit.loginWithGoogle(token: '${loginCubit.credGoogleWeb?.credential?.accessToken}');
-                  }});
-              } else {
-                loginCubit.signInWithGoogle().then((value) {
-                  loginCubit.loginWithGoogle(token: "${googleAuth?.accessToken}");
-                });
-              }
-            },
+            onTap: googleButtonTap,
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: Container(
@@ -48,9 +41,7 @@ class SocialButtonWidget extends StatelessWidget {
                 //padding: EdgeInsets.symmetric(horizontal: 20),
                 decoration:
                 BoxDecoration(
-                    color: state is SignInWithGoogleWebLoading || state is LoginWithGoogleLoading || state is SignInWithGoogleLoading
-                        ? opacityGoogle
-                        : Colors.white,
+                    color: googleButtonColor,
                     borderRadius: BorderRadius.circular(25),
                     border: Border.all(color: brushBorder,)
                 ),
@@ -75,17 +66,14 @@ class SocialButtonWidget extends StatelessWidget {
             hoverColor: Colors.transparent,
             highlightColor: Colors.transparent,  // Removes the background highlight color
             splashColor: Colors.transparent,     // Removes the splash color
-            onTap: state is AppleSignInLoading || state is SignUpAppleLoading? null : () async {
-              loginCubit.errorMessage = null;
-              loginCubit.signUpWithApple();
-            },
+            onTap: appleButtonTap,
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: Container(
                 height: 48,
                 //padding: EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                    color: state is AppleSignInLoading || state is SignUpAppleLoading ? opacityGoogle : Colors.white,
+                    color: appleButtonColor,
                     borderRadius: BorderRadius.circular(25),
                     border: Border.all(color: brushBorder,)
                 ),

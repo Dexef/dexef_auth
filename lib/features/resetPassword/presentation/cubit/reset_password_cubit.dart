@@ -1,10 +1,10 @@
-import 'package:auth_dexef/auth/resetPassword/presentation/cubit/reset_password_state.dart';
-import 'package:dio/dio.dart';
+import 'package:auth_dexef/features/login/presentation/cubit/login_cubit.dart';
+import 'package:auth_dexef/features/resetPassword/presentation/cubit/reset_password_state.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_ip_address/get_ip_address.dart' as ip;
 import '../../../../core/rest/cash_helper.dart';
 import '../../../../core/rest/constants.dart';
+import '../../../../main.dart';
 import '../../domain/useCase/create_new_password_use_case.dart';
 import '../../domain/useCase/resend_forget_pass_code_use_case.dart';
 import '../../domain/useCase/reset_password_use_case.dart';
@@ -19,66 +19,17 @@ class ResetPasswordCubit extends Cubit<ResetPasswordStates> {
   ):super(ResetPasswordInitialState());
 
   static ResetPasswordCubit get(context) => BlocProvider.of(context);
-  final ResetPasswordUseCase resetPasswordUseCase;
-  final CreateNewPasswordUseCase createNewPasswordUseCase;
-  final VerifyForgetPasswordUseCase verifyForgetPasswordUseCase;
-  final ResendForgetPasswordCodeUseCase resendForgetPasswordCodeUseCase;
+  static final ResetPasswordCubit _resetPasswordCubit = BlocProvider.of<ResetPasswordCubit>(navigatorKey.currentState!.context);
+  static ResetPasswordCubit get instance => _resetPasswordCubit;
+////////////////////////////////////////////////////////////////////////////////
+  String? errorMessage;
   Duration? differenceTime = const Duration(seconds: 0);
   DateTime now = DateTime.now().toUtc();
   DateTime? parsedDate;
-
-//////////////////////////////////////////////////////////////////////////////// reset password
   String? dialCode;
-  resetPassword({required String emailOrPhone,required bool isWhatsapp}) async {
-    emit(LoadingState());
-    dialCode = await lookupUserCountry();
-    final result = await resetPasswordUseCase(emailOrPhone,isWhatsapp);
-    result.fold((failure) => emit(ResetPasswordFailed(failure.errorMessage)),
-        (resetPassword) {
-      debugPrint("${resetPassword.isSuccess}");
-      if (resetPassword.isSuccess!) {
-        debugPrint("${resetPassword.data!.mobileId!}");
-        emit(ResetPasswordSuccess(resetPassword.data!.mobileId!));
-      } else {
-        emit(ResetPasswordError(resetPassword.errors!.first.message!));
-      }
-    });
-  }
-//////////////////////////////////////////////////////////////////////////////// verify forget password
-  Future<void> resetPasswordEmailOrPhone(String emailOrPhone,bool isWhatsapp) async {
-    print(emailOrPhone);
-    if (emailOrPhone.contains('@')) {
-       resetPassword (emailOrPhone: emailOrPhone,isWhatsapp: isWhatsapp);
-    } else if (emailOrPhone.contains("+")) {
-        resetPassword (emailOrPhone: emailOrPhone,isWhatsapp: isWhatsapp);
-    } else {
-      String? dialCode;
-      dialCode = await lookupUserCountry();
-      String? emailOrPhone1 = emailOrPhone.startsWith('0')
-          ? emailOrPhone.replaceFirst('0', '')
-          : emailOrPhone;
-        resetPassword (emailOrPhone: '+$dialCode$emailOrPhone1',isWhatsapp: isWhatsapp);
-      debugPrint('$dialCode$emailOrPhone1');
-    }
-  }
+/////////////////////////////////////////////////////////////////////////////////////////////// create new password
 ////////////////////////////////////////////////////////////////////////////////
-  Dio dio = Dio();
-  Future<String> lookupUserCountry() async {
-    // final ipv4 = await Ipify.ipv4();
-    final ipAddress = ip.IpAddress(type: ip.RequestType.text);
-    final ipv4 = await ipAddress.getIpAddress();
-    debugPrint('IP Address: $ipv4');
-    debugPrint(ipv4);
-    final response = await dio.get('https://api.ipregistry.co/$ipv4?key=tz3om0lor45w6ec6');
-    debugPrint(response.data['location']['country']['calling_code']);
-    if (response.statusCode == 200) {
-      return response.data['location']['country']['calling_code'];
-    } else {
-      throw Exception('Failed to get user country from IP address');
-    }
-  }
-////////////////////////////////////////////////////////////////////////////////
-  String? errorMessage;
+  final CreateNewPasswordUseCase createNewPasswordUseCase;
   createNewPassword ({
     required String code,
     required int mobileID,
@@ -95,44 +46,88 @@ class ResetPasswordCubit extends Cubit<ResetPasswordStates> {
       }
       else{
         errorMessage = createNewPassword.errors!.first.message;
-        emit(CreateNewPasswordError(createNewPassword));
+        emit(CreateNewPasswordError(createNewPassword.errors!.first.message));
+      }
+    });
+  }
+/////////////////////////////////////////////////////////////////////////////////////////////// resend code sms
+////////////////////////////////////////////////////////////////////////////////
+  final ResendForgetPasswordCodeUseCase resendForgetPasswordCodeUseCase;
+  resendCodeSms ({required int mobileId}) async {
+    emit(ResendForgetPasswordLoading());
+    try{
+      final result = await resendForgetPasswordCodeUseCase(mobileId,CacheHelper.getData(key: Constants.isWhatsApp.toString()) ?? true);
+      result.fold((failure) => emit(ResendForgetPasswordFailure(failure.errorMessage)),
+        (resendCode) {
+          if(resendCode.isSuccess == true){
+            CacheHelper.saveData(key: Constants.resetExpireDate.toString(), value: resendCode.data?.expiryDate??'');
+            CacheHelper.saveData(key: Constants.resetBlockedDate.toString(), value: resendCode.data?.blockTillDate ?? '');
+            checkDate();
+            emit(ResendForgetPasswordSuccess(resendCode));
+          }else{
+            emit(ResendForgetPasswordError(resendCode.errors?.first.message));
+          }
+        });
+    }catch(e){
+      emit(ResendForgetPasswordError(e.toString()));
+    }
+  }
+/////////////////////////////////////////////////////////////////////////////////////////////// reset password
+////////////////////////////////////////////////////////////////////////////////
+  final ResetPasswordUseCase resetPasswordUseCase;
+  resetPassword({required String emailOrPhone,required bool isWhatsapp}) async {
+    emit(ResetPasswordLoading());
+    dialCode = await LoginCubit.instance.lookupUserCountry();
+    final result = await resetPasswordUseCase(emailOrPhone,isWhatsapp);
+    result.fold((failure) => emit(ResetPasswordFailure(failure.errorMessage)),
+      (resetPassword) {
+        debugPrint("${resetPassword.isSuccess}");
+      if (resetPassword.isSuccess == true){
+        debugPrint("${resetPassword.data!.mobileId!}");
+        emit(ResetPasswordSuccess(resetPassword));
+      } else {
+        emit(ResetPasswordError(resetPassword.errors!.first.message!));
       }
     });
   }
 ////////////////////////////////////////////////////////////////////////////////
+  Future<void> resetPasswordEmailOrPhone(String emailOrPhone,bool isWhatsapp) async {
+    debugPrint(emailOrPhone);
+    if (emailOrPhone.contains('@')) {
+       resetPassword (emailOrPhone: emailOrPhone,isWhatsapp: isWhatsapp);
+    } else if (emailOrPhone.contains("+")) {
+        resetPassword (emailOrPhone: emailOrPhone,isWhatsapp: isWhatsapp);
+    } else {
+      String? dialCode;
+      dialCode = await LoginCubit.instance.lookupUserCountry();
+      String? emailOrPhone1 = emailOrPhone.startsWith('0')
+          ? emailOrPhone.replaceFirst('0', '')
+          : emailOrPhone;
+        resetPassword (emailOrPhone: '+$dialCode$emailOrPhone1',isWhatsapp: isWhatsapp);
+      debugPrint('$dialCode$emailOrPhone1');
+    }
+  }
+/////////////////////////////////////////////////////////////////////////////////////////////// verify Forget Password
+////////////////////////////////////////////////////////////////////////////////
+  final VerifyForgetPasswordUseCase verifyForgetPasswordUseCase;
   verifyForgetPassword({required String code, int? mobileID}) async {
-    emit(LoadingStateVerifyCode());
+    emit(VerifyMobileForgetLoading());
     final result = await verifyForgetPasswordUseCase(mobileID!, code);
     result.fold((failure) {
       errorMessage = failure.errorMessage;
-      emit(VerifyForgetPasswordFailed(failure.errorMessage));
+      emit(VerifyMobileForgetFailure(failure.errorMessage));
     },(verifyForgetPassword) {
       if (verifyForgetPassword.isSuccess!) {
         checkDate();
-        emit(VerifyForgetPasswordSuccess());
+        emit(VerifyMobileForgetSuccess(verifyForgetPassword));
       } else {
         errorMessage = verifyForgetPassword.errors?.first.message;
-        emit(VerifyForgetPasswordError(verifyForgetPassword.errors!.first.message!));
+        emit(VerifyMobileForgetError(verifyForgetPassword.errors!.first.message!));
       }
     });
   }
-/////////////////////////////////////////////////////////////////////////////////// resend code sms
-  resendCodeSms ({required int mobileId}) async {
-    emit(LoadingState());
-    try{
-      final result = await resendForgetPasswordCodeUseCase(mobileId,CacheHelper.getData(key: Constants.isWhatsApp.toString()) ?? true);
-      result.fold((failure) => emit(ResendCodeFailed(failure.errorMessage)),
-      (resendCode) {
-        CacheHelper.saveData(key: Constants.resetExpireDate.toString(), value: resendCode.data?.expiryDate??'');
-        CacheHelper.saveData(key: Constants.resetBlockedDate.toString(), value: resendCode.data?.blockTillDate ?? '');
-        checkDate();
-        emit(ResendCodeSuccess());
-      });
-    }catch(e){
-      debugPrint('resendCodeSms${e.toString()}');
-    }
-  }
-///////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////// public
+////////////////////////////////////////////////////////////////////////////////
   checkDate() {
     DateTime now = DateTime.now().toUtc();
     final isFirstTimeCheck = CacheHelper.getData(key: 'isFirstTimeCheck') ?? true;

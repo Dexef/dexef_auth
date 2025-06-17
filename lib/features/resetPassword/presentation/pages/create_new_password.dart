@@ -3,36 +3,28 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-// import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mydexef/core/class_constants/Routes.dart';
-import 'package:mydexef/core/class_constants/constants_methods.dart';
-import 'package:mydexef/features/auth/presentation/cubit/reset_password/reset_password_cubit.dart';
-import 'package:mydexef/features/auth/presentation/cubit/reset_password/reset_password_state.dart';
-import '../../../../../core/arguments.dart';
-import '../../../../../core/class_constants/app_constants_values.dart';
 import '../../../../../core/size_widgets/app_screen_size.dart';
-import '../../../../../core/widgets/alert_dialog.dart';
-import '../../../../../core/widgets/custom_round_button.dart';
-import '../../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../../core/widgets/default_login_screen.dart';
-import '../../../../../core/widgets/default_text.dart';
-import '../../../../../core/widgets/password_text_field.dart';
 import '../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../core/widgets/network_failed.dart';
-import '../../../../../style/colors/colors.dart';
-import '../../../../../utils/app_localizations.dart';
-import '../../../../../utils/cash_helper.dart';
-import '../../../../../utils/constants.dart';
-import '../../../../../utils/regex.dart';
-import 'package:mydexef/locator.dart' as di;
-import '../../../presentation/cubit/create_new_password_cubit/create_new_password_cubit.dart';
-import '../../../presentation/cubit/create_new_password_cubit/create_new_password_states.dart';
-import '../../../presentation/cubit/reset_password_cubit/reset_password_cubit.dart';
-import '../../../presentation/cubit/reset_password_cubit/reset_password_states.dart';
-import 'password_changed_successful.dart';
 import 'dart:ui' as ui;
+
+import '../../../../core/rest/app_constants.dart';
+import '../../../../core/rest/app_localizations.dart';
+import '../../../../core/rest/arguments.dart';
+import '../../../../core/rest/cash_helper.dart';
+import '../../../../core/rest/constants.dart';
+import '../../../../core/rest/methods.dart';
+import '../../../../core/rest/regex.dart';
+import '../../../../core/rest/routes.dart';
+import '../../../../core/size_widgets/responsive_widget.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/public/custom_round_button.dart';
+import '../../../../core/widgets/public/default_login_screen.dart';
+import '../../../../core/widgets/public/default_text.dart';
+import '../../../../core/widgets/public/network_failed.dart';
+import '../../../../core/widgets/public/password_text_field.dart';
+import '../cubit/reset_password_cubit.dart';
+import '../cubit/reset_password_state.dart';
 
 class CreateNewPasswordScreen extends StatefulWidget {
   const CreateNewPasswordScreen({Key? key}) : super(key: key);
@@ -45,7 +37,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
   TextEditingController codeController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
-  CreateNewPasswordCubit? createNewPasswordCubit;
+  late ResetPasswordCubit resetPasswordCubit;
   final formKey = GlobalKey<FormState>();
   bool visibleContainer = false;
   dynamic location;
@@ -80,58 +72,33 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
 ////////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
-    //final args = ModalRoute.of(context)!.settings.arguments as ArgumentsCreateNewPassword;
-    // final args = ArgumentsCreateNewPassword(
-    //   mobileID: 0,
-    //   code: 'AD'
-    // );
     ArgumentsCreateNewPassword? args = CacheHelper.getObjectFromPrefs(key: Constants.createNewPasswordArguments.toString(), model: ArgumentsCreateNewPassword);
     final size = MediaQuery.of(context).size;
     orientation = MediaQuery.of(context).orientation;
-    print('mobile id ====${args?.mobileID}');
-    return BlocProvider(
-      create: (context)=> di.locator<CreateNewPasswordCubit>(),
-      child: BlocConsumer<CreateNewPasswordCubit,CreateNewPasswordStates>(
-        listener: (context,state){
-          if(state is CreateNewPasswordSuccess){
-            //Navigator.of(context).pushNamedAndRemoveUntil(PasswordChangedSuccessful.route, (route) => false);
-            Router.neglect(context, () {
-              context.go(Routes.passwordChangedSuccessful);
-            });
-          }
-          // else if(state is CreateNewPasswordError){
-          //   showAlertDialog(
-          //       context: context,
-          //       isSuccess: false,
-          //       title: AppLocalizations.of(context)!.translate('resetPasswordFailed'),
-          //       subTitle: state.createNewPasswordEntity.errors![0].message,
-          //       textColor: Colors.black
-          //   );
-          // }else if(state is CreateNewPasswordFailure){
-          //   showAlertDialog(
-          //       context: context,
-          //       isSuccess: false,
-          //       title: AppLocalizations.of(context)!.translate('networkFailed'),
-          //       subTitle: getErrorMessage(state.message),
-          //       textColor: Colors.black
-          //   );
-          // }
-        },
-        builder: (context,state){
-          createNewPasswordCubit = CreateNewPasswordCubit.get(context);
-          return DefaultLoginScreen(
-            isLoading: state is CreateNewPasswordLoading,
-            body: args != null
-                // ? (isTap == true || (kIsWeb &&  MediaQuery.of(context).size.shortestSide < 600)) || (orientation == Orientation.portrait)
-                ? _buildRow(size, state, createNewPasswordCubit!, args)
-                // : _buildStack(size, state, createNewPasswordCubit!, args)
-                : Center(child: NetworkFailed()),
-          );
-        }, ),);
+    return BlocConsumer<ResetPasswordCubit,ResetPasswordStates>(
+      listener: (context,state){
+        if(state is CreateNewPasswordSuccess){
+          Router.neglect(context, () {
+            context.go(Routes.passwordChangedSuccessful);
+          });
+        }
+      },
+      builder: (context,state){
+        resetPasswordCubit = ResetPasswordCubit.instance;
+        return DefaultLoginScreen(
+          isLoading: state is CreateNewPasswordLoading,
+          body: args != null ? _buildRow(size, state, resetPasswordCubit, args) : const Center(child: NetworkFailed()),
+        );
+      },
+    );
   }
 ///////////////////////////////////////////////////////////////////////////////////
-  Widget _buildRow (var size, CreateNewPasswordStates state,
-      CreateNewPasswordCubit createNewPasswordCubit, ArgumentsCreateNewPassword args) => Row(
+  Widget _buildRow (
+    var size,
+    ResetPasswordStates state,
+    ResetPasswordCubit resetPasswordCubit,
+    ArgumentsCreateNewPassword args
+  )=>Row(
     children: [
       AbsorbPointer(
         absorbing: state is CreateNewPasswordLoading,
@@ -199,7 +166,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
           ),
         ),
       ),
-      Container(
+      SizedBox(
         height: MediaQuery.of(context).size.height,
         width: AppScreenSize.appWidgetSize.getLoginRightPanelWidth(context),
         child: Center(
@@ -240,7 +207,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                         label:  AppLocalizations.of(context)!.translate('password'),
                         onFieldSubmitted: (_){
                           if(formKey.currentState!.validate()){
-                            createNewPasswordCubit.createNewPassword(
+                            resetPasswordCubit.createNewPassword(
                                 code: args.code!,
                                 mobileID: args.mobileID!,
                                 password: passwordController.text
@@ -250,7 +217,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                         },
                         onChange: (string){
                           setState(() {
-                            createNewPasswordCubit.errorMessage = null;
+                            resetPasswordCubit.errorMessage = null;
                           });
                         },
                         validator: (value) {
@@ -270,12 +237,12 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                         label: AppLocalizations.of(context)!.translate('confirmPassword'),
                         onChange: (string){
                           setState(() {
-                            createNewPasswordCubit.errorMessage = null;
+                            resetPasswordCubit.errorMessage = null;
                           });
                         },
                         onFieldSubmitted: (_){
                           if(formKey.currentState!.validate()){
-                            createNewPasswordCubit.createNewPassword(
+                            resetPasswordCubit.createNewPassword(
                                 code: args.code!,
                                 mobileID: args.mobileID!,
                                 password: passwordController.text
@@ -296,7 +263,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                         // isPasswordVisible: true,
                       ),
                       DefaultText(
-                        text: createNewPasswordCubit.errorMessage ?? '',
+                        text: resetPasswordCubit.errorMessage ?? '',
                         isTextTheme: true,
                         themeStyle: Theme.of(context).textTheme.labelSmall!.copyWith(
                         color: redColor,
@@ -314,7 +281,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                             onPressed: (){
                               print('mobile id =====${args.mobileID}');
                               if(formKey.currentState!.validate()){
-                                createNewPasswordCubit.createNewPassword(
+                                resetPasswordCubit.createNewPassword(
                                     code: args.code!,
                                     mobileID: args.mobileID!,
                                     password: passwordController.text
@@ -333,8 +300,8 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
     ],
   );
 //////////////////////////////////////////////////////////////////////////////////
-  Widget _buildStack (var size, CreateNewPasswordStates state,
-      CreateNewPasswordCubit createNewPasswordCubit , ArgumentsCreateNewPassword args) => Stack(children: [
+  Widget _buildStack (var size, ResetPasswordStates state,
+      ResetPasswordCubit resetPasswordCubit , ArgumentsCreateNewPassword args) => Stack(children: [
     AnimatedSlide(
       duration: Duration(milliseconds: 300),
       offset: getLocation(),
@@ -383,7 +350,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                         label: AppLocalizations.of(context)!.translate('password'),
                         onChange: (string){
                           setState(() {
-                            createNewPasswordCubit.errorMessage = null;
+                            resetPasswordCubit.errorMessage = null;
                           });
                         },
                         validator: (value) {
@@ -407,7 +374,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                         label: AppLocalizations.of(context)!.translate('confirmPassword'),
                         onChange: (string){
                           setState(() {
-                            createNewPasswordCubit.errorMessage = null;
+                            resetPasswordCubit.errorMessage = null;
                           });
                         },
                         validator: (value) {
@@ -428,10 +395,10 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                       localWidthRatio: ratioWidthComponentLogin,
                       fixedHeight: 48,
                       child: CustomRoundedButton(
-                          isLoading: state is LoadingState,
+                          isLoading: state is CreateNewPasswordLoading,
                           title:  AppLocalizations.of(context)!.translate('save'), onPressed: (){
                         if(formKey.currentState!.validate()){
-                          createNewPasswordCubit.createNewPassword(
+                          resetPasswordCubit.createNewPassword(
                               code: args.code!,
                               mobileID: args.mobileID!,
                               password: passwordController.text
@@ -462,7 +429,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
       ),
     ),
     Visibility(
-      visible: (MediaQuery.of(context).size.width < AppConstants.minimumScreenSize) ? false : true,
+      visible: (MediaQuery.of(context).size.width < 1280) ? false : true,
       child: Container(
         width: size.width - AppScreenSize.appWidgetSize.getLoginRightPanelWidth(context),
         height: MediaQuery.of(context).size.height,

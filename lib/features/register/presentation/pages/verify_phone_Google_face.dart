@@ -1,42 +1,33 @@
 import 'dart:developer';
-
+import 'package:auth_dexef/features/register/presentation/cubit/register_cubit.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_field/countries.dart';
-import 'package:intl_phone_field/country_picker_dialog.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:mydexef/core/class_constants/constants_methods.dart';
-import 'package:mydexef/utils/cash_helper.dart';
-import 'package:mydexef/utils/constants.dart';
-import '../../../../../core/class_constants/Routes.dart';
-import '../../../../../core/arguments.dart';
-import '../../../../../core/class_constants/app_constants_values.dart';
 import '../../../../../core/size_widgets/app_screen_size.dart';
-import '../../../../../core/widgets/alert_dialog.dart';
-import '../../../../../core/widgets/custom_round_button.dart';
-import '../../../../../core/widgets/custom_text_field.dart';
 import '../../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../../core/widgets/default_login_screen.dart';
-import '../../../../../core/widgets/default_text.dart';
 import '../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../core/widgets/network_failed.dart';
-import '../../../../../style/colors/colors.dart';
-import '../../../../../utils/app_localizations.dart';
-import '../../../../../utils/regex.dart';
-import '../../../domain/entity/register_google_entity.dart';
-import '../../../domain/entity/verify_code_entity.dart';
-import '../../../presentation/cubit/verify_phone_google_face_cubit/verify_phone_google_face_cubit.dart';
-import '../../../presentation/cubit/verify_phone_google_face_cubit/verify_phone_google_face_states.dart';
-import 'verify_code_social.dart';
-import 'package:mydexef/locator.dart' as di;
 import 'dart:ui' as ui;
+import '../../../../core/rest/app_localizations.dart';
+import '../../../../core/rest/arguments.dart';
+import '../../../../core/rest/cash_helper.dart';
+import '../../../../core/rest/constants.dart';
+import '../../../../core/rest/methods.dart';
+import '../../../../core/rest/regex.dart';
+import '../../../../core/rest/routes.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/public/custom_round_button.dart';
+import '../../../../core/widgets/public/custom_text_field.dart';
+import '../../../../core/widgets/public/default_login_screen.dart';
+import '../../../../core/widgets/public/default_text.dart';
+import '../../../../core/widgets/public/network_failed.dart';
+import '../../domain/entity/register_google_entity.dart';
+import '../../domain/entity/verify_code_entity.dart';
+import '../cubit/register_states.dart';
 
 class VerifyPhoneNumber extends StatefulWidget {
   const VerifyPhoneNumber({
@@ -51,10 +42,10 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  VerifyPhoneGoogleFaceCubit? verifyPhoneGoogleFaceCubit;
+  late RegisterCubit registerCubit;
   final formKey = GlobalKey<FormState>();
   VerifyCodeEntity? verifyCodeEntity;
-  RegisterByGoogleEntity? registerByGoogleEntity;
+  RegisterGoogleEntity? registerByGoogleEntity;
   bool visibleContainer = false;
   dynamic location;
   bool isTap = false;
@@ -104,108 +95,42 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
       (args.name == null || args.name == "null") ? '' : args.name;
       emailController.text = (args.email == null || args.email == "null") ? "Invalid Email" : args.email;
     }
-    return BlocProvider(
-      create: (context) => di.locator<VerifyPhoneGoogleFaceCubit>(),
-      child:
-      BlocConsumer<VerifyPhoneGoogleFaceCubit, VerifyPhoneGoogleFaceStates>(
-        listener: (context, state) {
-          listenerMethod(state, context);
-        },
-        builder: (context, state) {
-          verifyPhoneGoogleFaceCubit = VerifyPhoneGoogleFaceCubit.get(context);
-          return DefaultLoginScreen(
-            isLoading: state is RegisterByGoogleStateLoading ||
-                state is RegisterFacebookLoading || state is RegisterAppleLoading,
-            body: args != null
-                // ? (isTap == true ||
-                // (kIsWeb &&
-                //     MediaQuery.of(context).size.shortestSide < 600)) ||
-                // (orientation == Orientation.portrait)
-                ? _buildRow(context, state, args)
-                // : _buildStack(context, state, args)
-                : const Center(child:  NetworkFailed()),
-          );
-        },
-      ),
+    return BlocConsumer<RegisterCubit, RegisterStates>(
+      listener: (context, state) {
+        listenerMethod(state, context);
+      },
+      builder: (context, state) {
+        registerCubit = RegisterCubit.instance;
+        return DefaultLoginScreen(
+          isLoading: state is RegisterGoogleLoading || state is RegisterAppleLoading,
+          body: args != null ? _buildRow(context, state, args) : const Center(child:  NetworkFailed()),
+        );
+      },
     );
   }
 
 ////////////////////////////////////////////////////////////////////////////////
-  void listenerMethod(VerifyPhoneGoogleFaceStates state, BuildContext context) {
-    if (state is RegisterByGoogleStateSuccess) {
-      //Navigator.of(context).pushNamedAndRemoveUntil(VerifyCodeSocial.route, (route) => false);
+  void listenerMethod(RegisterStates state, BuildContext context) {
+    if (state is RegisterGoogleSuccess) {
       Router.neglect(context, () {
-        // context.go(Routes.verifyCodeSocial);
         context.go(Routes.verifyCodeChooseSocial);
       });
       CacheHelper.saveObjectToPrefs(
           key: Constants.verifyCodeSocialArguments.toString(),
           object: ArgumentsResetPasswordVerifyCode(
-            mobileID: state.registerByGoogleEntity.data!.mobileId,
+            mobileID: state.registerGoogleEntity.data?.mobileId,
             isFromGoogle: true,
             isFromFacebook: false,
             isApple: false
           ));
       CacheHelper.saveObjectToPrefs(key: Constants.verifyCodeScreenArguments.toString(), object: ArgumentsVerifyCodeScreen(
-          mobileId:state.registerByGoogleEntity.data!.mobileId,
+          mobileId:state.registerGoogleEntity.data!.mobileId,
           fromPage: 'verifySocial',
       ));
       CacheHelper.saveData(key: Constants.emailOrPhoneReset.toString(), value: phoneController.text);
-      CacheHelper.saveData(key: Constants.mobileId.toString(), value: state.registerByGoogleEntity.data?.mobileId);
+      CacheHelper.saveData(key: Constants.mobileId.toString(), value: state.registerGoogleEntity.data?.mobileId);
 
-      // showAlertDialog(
-      //     context: context,
-      //     isSuccess: true,
-      //     title: AppLocalizations.of(context)!.translate('loginSuccessfully'),
-      //     textColor: Colors.black);
-    } else if (state is RegisterByGoogleStateError) {
-      // showAlertDialog(
-      //     context: context,
-      //     isSuccess: false,
-      //     title: "${state.registerByGoogleEntity.errors!.first.message}",
-      //     textColor: Colors.black);
-    } else if (state is RegisterFacebookSuccess) {
-      // showAlertDialog(
-      //     context: context,
-      //     isSuccess: true,
-      //     title: AppLocalizations.of(context)!.translate('loginSuccessfully'),
-      //     textColor: Colors.black);
-      CacheHelper.saveObjectToPrefs(
-          key: Constants.verifyCodeSocialArguments.toString(),
-          object: ArgumentsResetPasswordVerifyCode(
-            mobileID: state.registerFacebookEntity.data!.mobileId,
-            isFromGoogle: false,
-            isFromFacebook: true,
-            isApple: false
-          ));
-      CacheHelper.saveObjectToPrefs(key: Constants.verifyCodeScreenArguments.toString(), object: ArgumentsVerifyCodeScreen(
-          mobileId:  state.registerFacebookEntity.data!.mobileId,
-          fromPage: 'verifySocial'
-      ));
-      CacheHelper.saveData(key: Constants.mobileId.toString(), value: state.registerFacebookEntity.data?.mobileId);
 
-      Router.neglect(context, () => context.go(Routes.verifyCodeSocial));
-    } else if (state is RegisterFacebookError) {
-      // showAlertDialog(
-      //     context: context,
-      //     isSuccess: false,
-      //     subTitle: "${state.registerFacebookEntity.errors!.first.message}",
-      //     title: AppLocalizations.of(context)!.translate('failed'),
-      //     textColor: Colors.black);
-    }else if (state is RegisterFacebookFailure){
-      // showAlertDialog(
-      //     context: context,
-      //     isSuccess: false,
-      //     subTitle: getErrorMessage(state.message),
-      //     title: AppLocalizations.of(context)!.translate('networkFailed'),
-      //     textColor: Colors.black);
-    }else if(state is RegisterByGoogleStateFailure){
-      // showAlertDialog(
-      //     context: context,
-      //     isSuccess: false,
-      //     subTitle: getErrorMessage(state.message),
-      //     title: AppLocalizations.of(context)!.translate('networkFailed'),
-      //     textColor: Colors.black);
     }else if(state is RegisterAppleSuccess){
       CacheHelper.saveObjectToPrefs(
           key: Constants.verifyCodeSocialArguments.toString(),
@@ -226,10 +151,9 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
   }
 
 ////////////////////////////////////////////////////////////////////////////////
-  Widget _buildRow(BuildContext context, VerifyPhoneGoogleFaceStates state,
-      ArgumentsVerifyPhoneNumber args) =>
+  Widget _buildRow(BuildContext context, RegisterStates state, ArgumentsVerifyPhoneNumber args) =>
       AbsorbPointer(
-        absorbing:state is RegisterByGoogleStateLoading || state is RegisterAppleLoading ,
+        absorbing:state is RegisterGoogleLoading || state is RegisterAppleLoading ,
         child: Row(
           children: [
             Container(
@@ -357,8 +281,7 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
                                 return null;
                               },
                               onFieldSubmitted: state
-                              is RegisterByGoogleStateLoading ||
-                                  state is RegisterFacebookLoading
+                              is RegisterGoogleLoading
                                   ? (_) {}
                                   : (_) async {
                                 if (formKey.currentState!.validate()) {
@@ -369,29 +292,22 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
                                         ? phoneNumber!.replaceFirst('0', '')
                                         : phoneNumber;
                                     if (args.isGoogle == true) {
-                                      await verifyPhoneGoogleFaceCubit?.registerByGoogle(
+                                      await registerCubit.registerGoogle(
                                           token: args.token,
                                           email: args.email ?? emailController.text,
                                           mobile: phoneNumber!,
-                                          countryCode: countryCode!.substring(1).trim(),
+                                          countryId: countryCode!.substring(1).trim(),
                                           sourceId: 2);
                                       log('token = ${args.token}');
                                       log('email = ${args.email}');
                                       log('phoneNumber = ${countryCode! + phone!}');
                                       log('countryCode = ${countryCode!.substring(1).trim()}');
-                                    } else if (args.isFacebook == true) {
-                                      await verifyPhoneGoogleFaceCubit?.registerByFacebook(
-                                          token: args.token,
-                                          email: args.email ?? emailController.text,
-                                          mobile: phoneNumber!,
-                                          countryCode: countryCode!.substring(1).trim(),
-                                          sourceId: 2);
                                     } else if (args.isApple == true) {
-                                      await verifyPhoneGoogleFaceCubit?.registerByApple(
+                                      await registerCubit.registerApple(
                                           token: args.token,
                                           email: args.email ?? emailController.text,
                                           mobile: phoneNumber!,
-                                          countryCode: countryCode!.substring(1).trim(),
+                                          countryId: countryCode!.substring(1).trim(),
                                           sourceId: 1);
                                     }
                                   }
@@ -422,9 +338,7 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
                                 return null;
                               },
                               onFieldSubmitted: state
-                              is RegisterByGoogleStateLoading ||
-                                  state is RegisterFacebookLoading
-                                  ? (_) {}
+                              is RegisterGoogleLoading ? (_) {}
                                   : (_) async {
                                 if (formKey.currentState!.validate()) {
                                   if (phoneNumber == null) {
@@ -434,29 +348,22 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
                                         ? phoneNumber!.replaceFirst('0', '')
                                         : phoneNumber;
                                     if (args.isGoogle == true) {
-                                      await verifyPhoneGoogleFaceCubit?.registerByGoogle(
+                                      await registerCubit.registerGoogle(
                                           token: args.token,
                                           email: args.email ?? emailController.text,
                                           mobile: phoneNumber!,
-                                          countryCode: countryCode!.substring(1).trim(),
+                                          countryId: countryCode!.substring(1).trim(),
                                           sourceId: 2);
                                       log('token = ${args.token}');
                                       log('email = ${args.email}');
                                       log('phoneNumber = ${countryCode! + phone!}');
                                       log('countryCode = ${countryCode!.substring(1).trim()}');
-                                    } else if (args.isFacebook == true) {
-                                      await verifyPhoneGoogleFaceCubit?.registerByFacebook(
-                                          token: args.token,
-                                          email: args.email ?? emailController.text,
-                                          mobile: phoneNumber!,
-                                          countryCode: countryCode!.substring(1).trim(),
-                                          sourceId: 2);
                                     } else if (args.isApple == true) {
-                                      await verifyPhoneGoogleFaceCubit?.registerByApple(
+                                      await registerCubit.registerApple(
                                           token: args.token,
                                           email: args.email ?? emailController.text,
                                           mobile: phoneNumber!,
-                                          countryCode: countryCode!.substring(1).trim(),
+                                          countryId: countryCode!.substring(1).trim(),
                                           sourceId: 1);
                                     }
                                   }
@@ -615,16 +522,16 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
                                     labelText: AppLocalizations.of(context)!.translate('phoneNumber'),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(25),
-                                      borderSide: BorderSide(color:state is RegisterByGoogleStateError ? redColor : brushBorder),
+                                      borderSide: BorderSide(color:state is RegisterGoogleError ? redColor : brushBorder),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(25),
                                         borderSide:  BorderSide(
-                                          color: state is RegisterByGoogleStateError ? redColor :brushBorder,
+                                          color: state is RegisterGoogleError ? redColor :brushBorder,
                                         )),
                                     focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(25),
-                                        borderSide: BorderSide(color:state is RegisterByGoogleStateError ? redColor : selectedBorder)),
+                                        borderSide: BorderSide(color:state is RegisterGoogleError ? redColor : selectedBorder)),
                                     errorBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(25),
                                         borderSide:
@@ -637,7 +544,7 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
                                   phoneNumber = phone.phoneNumber;
                                   countryCode = phone.dialCode;
                                   setState(() {
-                                    verifyPhoneGoogleFaceCubit?.errorMessage = null;
+                                    registerCubit.errorMessage = null;
                                     if (phoneController.text.startsWith('0')) {
                                       phoneController.value = TextEditingValue(
                                         text: phoneController.text.substring(1),
@@ -658,7 +565,7 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
                           ResponsiveWidget(
                             localWidthRatio: ratioWidthComponentLogin,
                             child: DefaultText(
-                              text: verifyPhoneGoogleFaceCubit?.errorMessage ?? '',
+                              text: registerCubit.errorMessage ?? '',
                               isTextTheme: true,
                               maxLines: 2,
                               themeStyle: Theme.of(context).textTheme.labelSmall!.copyWith(
@@ -676,8 +583,8 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
                             localWidthRatio: ratioWidthComponentLogin,
                             child: CustomRoundedButton(
                                 title: AppLocalizations.of(context)!.translate('next'),
-                                isLoading: state is RegisterByGoogleStateLoading || state is RegisterFacebookLoading ? true : false,
-                                onPressed: state is RegisterByGoogleStateLoading || state is RegisterFacebookLoading ? () {
+                                isLoading: state is RegisterGoogleLoading ? true : false,
+                                onPressed: state is RegisterGoogleLoading ? () {
                                   debugPrint('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
                                 }:() async {
                                   nextPressed(args);
@@ -1076,29 +983,22 @@ class _VerifyPhoneNumberState extends State<VerifyPhoneNumber> {
             ? phoneNumber!.replaceFirst('0', '')
             : phoneNumber;
         if (args.isGoogle == true) {
-          await verifyPhoneGoogleFaceCubit?.registerByGoogle(
+          await registerCubit.registerGoogle(
               token: args.token,
               email: args.email ?? emailController.text,
               mobile: phoneNumber!,
-              countryCode: countryCode!.substring(1).trim(),
+              countryId: countryCode!.substring(1).trim(),
               sourceId: 2);
           log('token = ${args.token}');
           log('email = ${args.email}');
           log('phoneNumber = ${countryCode! + phone!}');
           log('countryCode = ${countryCode!.substring(1).trim()}');
-        } else if (args.isFacebook == true) {
-          await verifyPhoneGoogleFaceCubit?.registerByFacebook(
-              token: args.token,
-              email: args.email ?? emailController.text,
-              mobile: phoneNumber!,
-              countryCode: countryCode!.substring(1).trim(),
-              sourceId: 2);
         } else if (args.isApple == true) {
-          await verifyPhoneGoogleFaceCubit?.registerByApple(
+          await registerCubit.registerApple(
               token: args.token,
               email: args.email ?? emailController.text,
               mobile: phoneNumber!,
-              countryCode: countryCode!.substring(1).trim(),
+              countryId: countryCode!.substring(1).trim(),
               sourceId: 1);
         }
       }

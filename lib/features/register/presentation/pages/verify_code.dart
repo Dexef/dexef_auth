@@ -1,29 +1,28 @@
+import 'package:auth_dexef/features/register/presentation/cubit/register_cubit.dart';
+import 'package:auth_dexef/features/resetPassword/presentation/cubit/reset_password_cubit.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mydexef/core/class_constants/constants_methods.dart';
 import 'package:timer_count_down/timer_count_down.dart';
-import '../../../../../core/class_constants/Routes.dart';
-import '../../../../../core/arguments.dart';
-import '../../../../../core/class_constants/app_constants_values.dart';
 import '../../../../../core/size_widgets/app_screen_size.dart';
-import '../../../../../core/widgets/alert_dialog.dart';
-import '../../../../../core/widgets/custom_round_button.dart';
 import '../../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../../core/widgets/default_login_screen.dart';
-import '../../../../../core/widgets/default_text.dart';
 import '../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../core/widgets/network_failed.dart';
-import '../../../../../style/colors/colors.dart';
-import '../../../../../utils/app_localizations.dart';
-import '../../../../../utils/cash_helper.dart';
-import '../../../../../utils/constants.dart';
-import '../../../presentation/cubit/verify_code_cubit/verify_code_cubit.dart';
-import '../../../presentation/cubit/verify_code_cubit/verify_code_states.dart';
-import 'package:mydexef/locator.dart' as di;
 import 'dart:ui' as ui;
+
+import '../../../../core/rest/app_localizations.dart';
+import '../../../../core/rest/arguments.dart';
+import '../../../../core/rest/cash_helper.dart';
+import '../../../../core/rest/constants.dart';
+import '../../../../core/rest/methods.dart';
+import '../../../../core/rest/routes.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/public/custom_round_button.dart';
+import '../../../../core/widgets/public/default_login_screen.dart';
+import '../../../../core/widgets/public/default_text.dart';
+import '../../../../core/widgets/public/network_failed.dart';
+import '../cubit/register_states.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
   const VerifyCodeScreen({
@@ -50,7 +49,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
   bool isTap = false;
   double opacity = 0.0;
   String? code;
-  VerifyCodeCubit? verifyCodeCubit;
+  late RegisterCubit registerCubit;
   FocusNode firstNode = FocusNode();
   FocusNode secondNode = FocusNode();
   FocusNode thirdNode = FocusNode();
@@ -110,7 +109,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
-        verifyCodeCubit?.checkDate();
+        ResetPasswordCubit.instance.checkDate();
         break;
       case AppLifecycleState.inactive:
         // verifyCodeCubit?.checkDate();
@@ -132,64 +131,29 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
   Widget build(BuildContext context) {
     orientation = MediaQuery.of(context).orientation;
     ArgumentsVerifyCodeScreen? args = CacheHelper.getObjectFromPrefs(
-        key: Constants.verifyCodeScreenArguments.toString(),
-        model: ArgumentsVerifyCodeScreen);
-    // verifyCodeCubit?.checkDate();
-
-    return BlocProvider(
-      create: (context) => di.locator<VerifyCodeCubit>()..checkDate(),
-      child: BlocConsumer<VerifyCodeCubit, VerifyCodeStates>(
-        listener: (context, state) {
-          if (state is VerifyCodeFailed) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title:
-            //         AppLocalizations.of(context)!.translate('verifyCodeFailed'),
-            //     subTitle:
-            //         AppLocalizations.of(context)!.translate('invalidCode'),
-            //     textColor: Colors.black);
-          } else if (state is LoginSuccess) {
-            Router.neglect(context,
-                () => context.go(Routes.preparingDataScreenFromNormal));
-          } else if (state is VerifyCodeError) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title: AppLocalizations.of(context)!.translate('networkFailed'),
-            //     subTitle: getErrorMessage(state.message),
-            //     textColor: Colors.black);
-          } else if (state is SendSmsSuccess || state is ResendCodeSuccess) {
-            verifyCodeCubit?.checkDate();
-          }
-        },
-        builder: (context, state) {
-          verifyCodeCubit = VerifyCodeCubit.get(context);
-          return DefaultLoginScreen(
-            isLoading: state is VerifyLoadingState ||
-                verifyCodeCubit?.isLoading == true ||
-                state is ChangePhoneLoadingState,
-            body: args != null
-                // ? (isTap == true || (kIsWeb && MediaQuery.of(context).size.shortestSide < 600)) || (orientation == Orientation.portrait)
-                // ? (MediaQuery.of(context).size.width > 640)
-                ? _buildRow(context, state, args)
-                // : _buildRowMobile(context, state, args)
-                // : _buildStack(context, state, args)
-                : const Center(child: NetworkFailed()),
-          );
-        },
-      ),
+      key: Constants.verifyCodeScreenArguments.toString(),
+      model: ArgumentsVerifyCodeScreen
+    );
+    return BlocConsumer<RegisterCubit, RegisterStates>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        registerCubit = RegisterCubit.instance;
+        return DefaultLoginScreen(
+          isLoading: state is VerifyMobileLoading || state is ChangeMobileLoading,
+          body: args != null ? _buildRow(context, state, args) : const Center(child: NetworkFailed()),
+        );
+      },
     );
   }
 
 ////////////////////////////////////////////////////////////////////////////////
   Widget _buildRow(
     BuildContext context,
-    VerifyCodeStates state,
+      RegisterStates state,
     ArgumentsVerifyCodeScreen args,
   ) =>
       AbsorbPointer(
-        absorbing: state is VerifyLoadingState,
+        absorbing: state is VerifyMobileLoading,
         child: Row(
           children: [
             Container(
@@ -411,12 +375,12 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                         print(args.mobileId);
                                         print('CODE IS $code');
                                         print("email is ${args.email}");
-                                        verifyCodeCubit!.verifyCodeSms(
-                                          mobileId: args.mobileId!,
-                                          code: code!,
-                                          email: args.email,
-                                          password: args.password,
-                                        );
+                                        // registerCubit.verifyCodeSms(
+                                        //   mobileId: args.mobileId!,
+                                        //   code: code!,
+                                        //   email: args.email,
+                                        //   password: args.password,
+                                        // );
                                       } else {
                                         setState(() {
                                           isValidCode = false;
@@ -480,12 +444,12 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                         print(args.mobileId);
                                         print('CODE IS $code');
                                         print("email is ${args.email}");
-                                        verifyCodeCubit!.verifyCodeSms(
-                                          mobileId: args.mobileId!,
-                                          code: code!,
-                                          email: args.email,
-                                          password: args.password,
-                                        );
+                                        // verifyCodeCubit!.verifyCodeSms(
+                                        //   mobileId: args.mobileId!,
+                                        //   code: code!,
+                                        //   email: args.email,
+                                        //   password: args.password,
+                                        // );
                                       } else {
                                         setState(() {
                                           isValidCode = false;
@@ -524,26 +488,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                   ),
                                   Expanded(
                                       child: TextFormField(
-                                    onFieldSubmitted: (_) {
-                                      if (formKey.currentState!.validate()) {
-                                        isValidCode = true;
-                                        code =
-                                            "${codeControllerOne.text}${codeControllerTwo.text}${codeControllerThree.text}${codeControllerFour.text}${codeControllerFive.text}";
-                                        print(args.mobileId);
-                                        print('CODE IS $code');
-                                        print("email is ${args.email}");
-                                        verifyCodeCubit!.verifyCodeSms(
-                                          mobileId: args.mobileId!,
-                                          code: code!,
-                                          email: args.email,
-                                          password: args.password,
-                                        );
-                                      } else {
-                                        setState(() {
-                                          isValidCode = false;
-                                        });
-                                      }
-                                    },
+                                    onFieldSubmitted: (_) {},
                                     maxLength: 1,
                                     controller: codeControllerThree,
                                     style: TextStyle(
@@ -584,12 +529,12 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                         print(args.mobileId);
                                         print('CODE IS $code');
                                         print("email is ${args.email}");
-                                        verifyCodeCubit!.verifyCodeSms(
-                                          mobileId: args.mobileId!,
-                                          code: code!,
-                                          email: args.email,
-                                          password: args.password,
-                                        );
+                                        // verifyCodeCubit!.verifyCodeSms(
+                                        //   mobileId: args.mobileId!,
+                                        //   code: code!,
+                                        //   email: args.email,
+                                        //   password: args.password,
+                                        // );
                                       } else {
                                         setState(() {
                                           isValidCode = false;
@@ -636,12 +581,12 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                         print(args.mobileId);
                                         print('CODE IS $code');
                                         print("email is ${args.email}");
-                                        verifyCodeCubit!.verifyCodeSms(
-                                          mobileId: args.mobileId!,
-                                          code: code!,
-                                          email: args.email,
-                                          password: args.password,
-                                        );
+                                        // verifyCodeCubit!.verifyCodeSms(
+                                        //   mobileId: args.mobileId!,
+                                        //   code: code!,
+                                        //   email: args.email,
+                                        //   password: args.password,
+                                        // );
                                       } else {
                                         setState(() {
                                           isValidCode = false;
@@ -707,7 +652,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                             localWidthRatio:
                                 AppScreenSize.appDesignSize.isWebPlatform(context) ? ratioImageWidth : 0.8,
                             child: DefaultText(
-                              text: state is VerifyCodeFailed
+                              text: state is VerifyMobileError
                                   ? (state.message)
                                   : '',
                               isTextTheme: true,
@@ -728,12 +673,12 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                 : 0.8,
                             fixedHeight: 48,
                             child: CustomRoundedButton(
-                                isLoading: state is VerifyLoadingState,
+                                isLoading: state is VerifyMobileLoading,
                                 title: AppLocalizations.of(context)!
                                     .translate('verify'),
                                 onPressed: () {
                                   setState(() {
-                                    verifyCodeCubit?.errorMessage = '';
+                                    registerCubit.errorMessage = '';
                                   });
                                   if (formKey.currentState!.validate()) {
                                     isValidCode = true;
@@ -742,12 +687,12 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                     print(args.mobileId);
                                     print('CODE IS $code');
                                     print("email is ${args.email}");
-                                    verifyCodeCubit!.verifyCodeSms(
-                                      mobileId: args.mobileId!,
-                                      code: code!,
-                                      email: args.email,
-                                      password: args.password,
-                                    );
+                                    // verifyCodeCubit!.verifyCodeSms(
+                                    //   mobileId: args.mobileId!,
+                                    //   code: code!,
+                                    //   email: args.email,
+                                    //   password: args.password,
+                                    // );
                                   } else {
                                     setState(() {
                                       isValidCode = false;
@@ -788,7 +733,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                               children: [
                                 MouseRegion(
                                   cursor: SystemMouseCursors.click,
-                                  child: verifyCodeCubit?.differenceTime !=
+                                  child: ResetPasswordCubit.instance.differenceTime !=
                                           Duration.zero
                                       ?
                                       //                                StreamBuilder(
@@ -875,7 +820,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                       //                                 //       ),
                                       //                                   )
                                       Countdown(
-                                          seconds: verifyCodeCubit!
+                                          seconds: ResetPasswordCubit.instance
                                               .differenceTime!.inSeconds,
                                           build: (BuildContext context,
                                               double time) {
@@ -920,7 +865,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                           },
                                           interval: Duration(seconds: 1),
                                           onFinished: () {
-                                            verifyCodeCubit?.defaultDate();
+                                            ResetPasswordCubit.instance.defaultDate();
                                             // setState(() {
                                             //   verifyCodeCubit?.differenceTime = Duration.zero;
                                             // });
@@ -934,8 +879,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                           splashColor: Colors.transparent,
                                           // Removes the splash color
 
-                                          onTap: verifyCodeCubit?.isLoading ==
-                                                  true
+                                          onTap: state is ResendCodeLoading
                                               ? () {}
                                               : () {
                                                   codeControllerOne.clear();
@@ -943,15 +887,9 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen>
                                                   codeControllerThree.clear();
                                                   codeControllerFour.clear();
                                                   codeControllerFive.clear();
-                                                  verifyCodeCubit!
+                                                  registerCubit
                                                       .resendCodeSms(
                                                     mobileId: args.mobileId!,
-                                                    isWhatsapp:
-                                                        CacheHelper.getData(
-                                                                key: Constants
-                                                                    .isWhatsApp
-                                                                    .toString()) ??
-                                                            true,
                                                   );
                                                   // WidgetsBinding.instance.addPostFrameCallback((_) {
                                                   //   verifyCodeCubit?.checkDate();

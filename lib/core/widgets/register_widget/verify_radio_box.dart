@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-
-import '../../../../core/class_constants/constants_methods.dart';
 import '../../../../core/size_widgets/app_screen_size.dart';
 import '../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../core/widgets/default_text.dart';
-import '../../../../core/size_widgets/app_font_style.dart';
-import '../../../../style/colors/colors.dart';
+import '../../theme/colors.dart';
+import '../public/default_text.dart';
 
 class VerifyRadio extends StatelessWidget {
   VerifyRadio({

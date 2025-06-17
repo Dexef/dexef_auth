@@ -18,5 +18,7 @@ class AppConstants{
 ////////////////////////////////////////////////////////////////////////////////
   static String registerPopupCanceledByUser = 'This operation has been cancelled due to another conflicting popup being opened';
   static String registerBeforeFinalizingOperation = 'The popup has been closed by the user before finalizing the operation';
+////////////////////////////////////////////////////////////////////////////////
+  static double minimumScreenSize = 1280;
 }
 

@@ -13,6 +13,8 @@ import 'core/rest/my_navigator_observer.dart';
 import 'core/rest/routes.dart';
 import 'core/theme/light_theme.dart';
 import 'features/login/presentation/cubit/login_cubit.dart';
+import 'features/register/presentation/cubit/register_cubit.dart';
+import 'features/resetPassword/presentation/cubit/reset_password_cubit.dart';
 import 'main.dart';
 import 'package:auth_dexef/locator.dart' as di;
 
@@ -44,6 +46,8 @@ class MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => di.locator<LoginCubit>()..lookupUserCountry()),
+        BlocProvider(create: (context) => di.locator<RegisterCubit>()),
+        BlocProvider(create: (context) => di.locator<ResetPasswordCubit>()),
       ],
       child: ValueListenableBuilder<int>(
         valueListenable: routerNotifier,

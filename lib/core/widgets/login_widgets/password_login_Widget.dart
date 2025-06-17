@@ -1,24 +1,20 @@
+import 'package:auth_dexef/core/rest/regex.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mydexef/features/auth/presentation/cubit/1.login_cubit/login_cubit.dart';
-
-import '../../../../../../core/class_constants/Routes.dart';
-import '../../../../../../core/class_constants/constants_methods.dart';
 import '../../../../../../core/size_widgets/app_screen_size.dart';
-import '../../../../../../core/widgets/custom_check_box.dart';
-import '../../../../../../core/widgets/custom_round_button.dart';
 import '../../../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../../../core/widgets/default_text.dart';
-import '../../../../../../core/widgets/password_text_field.dart';
 import '../../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../../style/colors/colors.dart';
-import '../../../../../../utils/app_localizations.dart';
-import '../../../../../../utils/cash_helper.dart';
-import '../../../../../../utils/constants.dart';
-import '../../../../login/presentation/cubit/login_state.dart';
+import '../../../features/login/presentation/cubit/login_cubit.dart';
+import '../../../features/login/presentation/cubit/login_state.dart';
+import '../../rest/app_localizations.dart';
+import '../../rest/routes.dart';
+import '../../theme/colors.dart';
+import '../public/custom_check_box.dart';
+import '../public/custom_round_button.dart';
+import '../public/default_text.dart';
+import '../public/password_text_field.dart';
 
 bool isLoadingLogin = false;
 class PasswordLoginWidget extends StatefulWidget {
@@ -50,7 +46,7 @@ class _PasswordLoginWidgetState extends State<PasswordLoginWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 20,),
+        const SizedBox(height: 20,),
         PasswordTextFormField(
           controller: widget.passwordController,
           focusNode: widget.passwordFocusNode,
@@ -61,7 +57,7 @@ class _PasswordLoginWidgetState extends State<PasswordLoginWidget> {
               widget.formKey.currentState!.save();
               isLoadingLogin = true;
               widget.loginCubit.errorMessage = null;
-              await widget.loginCubit.signInNormal(widget.phoneOrEmail, widget.passwordController.text, context);
+              await widget.loginCubit.loginNormal(context, emailOrPhone: widget.phoneOrEmail, passwordText: widget.passwordController.text);
             }
           },
           onChange: (String value) {
@@ -162,7 +158,7 @@ class _PasswordLoginWidgetState extends State<PasswordLoginWidget> {
                 widget.formKey.currentState!.save();
                 isLoadingLogin = true;
                 widget.loginCubit.errorMessage = null;
-                await widget.loginCubit.signInNormal(widget.phoneOrEmail, widget.passwordController.text, context);
+                await widget.loginCubit.loginNormal(context, emailOrPhone: widget.phoneOrEmail, passwordText: widget.passwordController.text);
               }
             },
           ),

@@ -1,3 +1,5 @@
+import 'package:auth_dexef/core/rest/image_paths.dart';
+import 'package:auth_dexef/features/register/presentation/cubit/register_cubit.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,29 +8,25 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mydexef/core/size_widgets/app_font_style.dart';
 import 'package:timer_count_down/timer_count_down.dart';
-import '../../../../../core/class_constants/Routes.dart';
-import '../../../../../core/arguments.dart';
-import 'package:mydexef/locator.dart' as di;
-import '../../../../../core/class_constants/app_constants_values.dart';
-import '../../../../../core/class_constants/constants_methods.dart';
-import '../../../../../core/class_constants/images_path.dart';
 import '../../../../../core/size_widgets/app_screen_size.dart';
-import '../../../../../core/widgets/alert_dialog.dart';
-import '../../../../../core/widgets/custom_round_button.dart';
 import '../../../../../core/size_widgets/responsive_widget.dart';
-import '../../../../../core/widgets/default_login_screen.dart';
-import '../../../../../core/widgets/default_text.dart';
-import '../../../../../core/widgets/network_failed.dart';
-import '../../../../../style/colors/colors.dart';
-import '../../../../../utils/app_localizations.dart';
-import '../../../../../utils/cash_helper.dart';
-import '../../../../../utils/constants.dart';
-import '../../../presentation/cubit/verify_code_cubit/verify_code_states.dart';
-import '../../../presentation/cubit/verify_code_social_cubit/verify_code_social_cubit.dart';
-import '../../../presentation/cubit/verify_code_social_cubit/verify_code_social_states.dart';
+import '../../../../core/rest/app_constants.dart';
+import '../../../../core/rest/app_localizations.dart';
+import '../../../../core/rest/arguments.dart';
+import '../../../../core/rest/cash_helper.dart';
+import '../../../../core/rest/constants.dart';
+import '../../../../core/rest/methods.dart';
+import '../../../../core/rest/routes.dart';
+import '../../../../core/size_widgets/app_font_style.dart';
+import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/public/custom_round_button.dart';
+import '../../../../core/widgets/public/default_login_screen.dart';
+import '../../../../core/widgets/public/default_text.dart';
+import '../../../../core/widgets/public/network_failed.dart';
 import 'dart:ui' as ui;
+
+import '../cubit/register_states.dart';
 
 class VerifyCodeSocial extends StatefulWidget {
   const VerifyCodeSocial({Key? key}) : super(key: key);
@@ -53,7 +51,7 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
   int userBlockCounter = 0;
   bool isCountDown = true;
   final formKey = GlobalKey<FormState>();
-  VerifyCodeSocialCubit? verifyCodeSocialCubit;
+  late RegisterCubit registerCubit;
   bool visibleContainer = false;
   dynamic location;
   bool isTap = false;
@@ -105,80 +103,28 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
     ArgumentsResetPasswordVerifyCode? args = CacheHelper.getObjectFromPrefs(
         key: Constants.verifyCodeSocialArguments.toString(),
         model: ArgumentsResetPasswordVerifyCode);
-    return BlocProvider(
-      create: (context) => di.locator<VerifyCodeSocialCubit>(),
-      child: BlocConsumer<VerifyCodeSocialCubit, VerifyCodeSocialStates>(
-        listener: (context, state) {
-          if (state is VerifyCodeGoogleFaceError) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title: AppLocalizations.of(context)!.translate('failed'),
-            //     subTitle: state.verifyCodeEntity.errors?[0].message,
-            //     textColor: Colors.black);
-          } else if (state is SignInWithGoogleSuccess ||
-              state is SignInWithFaceSuccess ||
-              state is AppleSignInSuccess) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: true,
-            //     title: AppLocalizations.of(context)!.translate('success'),
-            //     textColor: Colors.black
-            // );
-            Router.neglect(context,
-                () => context.go(Routes.preparingDataScreenFromSocial));
-          } else if (state is VerifyCodeGoogleFaceFailure) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title: AppLocalizations.of(context)!.translate('networkFailed'),
-            //     subTitle: state.message,
-            //     textColor: Colors.black);
-          } else if (state is SignInWithGoogleFailure) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title:  AppLocalizations.of(context)!.translate('networkFailed'),
-            //
-            //     subTitle: state.message,
-            //     textColor: Colors.black);
-          } else if (state is SignInWithFaceFailure) {
-            // showAlertDialog(
-            //     context: context,
-            //     isSuccess: false,
-            //     title: AppLocalizations.of(context)!.translate('networkFailed'),
-            //     subTitle: state.message,
-            //     textColor: Colors.black);
-          }
-        },
-        builder: (context, state) {
-          verifyCodeSocialCubit = VerifyCodeSocialCubit.get(context);
-          final size = MediaQuery.of(context).size;
-          return DefaultLoginScreen(
-            isLoading: state is VerifyCodeGoogleFaceLoading ||
-                state is SignInWithFaceLoading ||
-                state is SignInWithGoogleStartLoading,
-            body: args != null
-                // ? (isTap == true || (kIsWeb && MediaQuery.of(context).size.shortestSide < 600)) || (orientation == Orientation.portrait)
-                ? _buildRow(size, state, args)
-                // : _buildStack(size, state, args)
-                : Center(child: Center(child: NetworkFailed())),
-          );
-        },
-      ),
+    return BlocConsumer<RegisterCubit, RegisterStates>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        registerCubit = RegisterCubit.instance;
+        final size = MediaQuery.of(context).size;
+        return DefaultLoginScreen(
+          isLoading: state is VerifyMobileLoading,
+          body: args != null ? _buildRow(size, state, args) : const Center(child: NetworkFailed()),
+        );
+      },
     );
   }
 
 ////////////////////////////////////////////////////////////////////////////////
-  Widget _buildRow(var size, VerifyCodeSocialStates state,
-          ArgumentsResetPasswordVerifyCode args) =>
+  Widget _buildRow(var size, RegisterStates state, ArgumentsResetPasswordVerifyCode args) =>
       Row(
         children: [
           AbsorbPointer(
-            absorbing: state is VerifyCodeGoogleFaceLoading ||
-                state is SignInWithGoogleStartLoading ||
-                state is ResendLoadingState ||
-                state is AppleSignInLoading,
+            absorbing: state is VerifyMobileLoading ||
+                state is SignUpGoogleWebLoading ||
+                state is ResendCodeLoading ||
+                state is SignUpAppleLoading,
             child: Container(
               width: MediaQuery.of(context).size.width -
                   AppScreenSize.appWidgetSize.getLoginRightPanelWidth(context),
@@ -405,23 +351,10 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
                                       onFieldSubmitted: (_) {
                                         if (formKey.currentState!.validate()) {
                                           isValidCode = true;
-                                          print(args.mobileID);
-                                          if (args.isFromGoogle == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code: "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: true,
-                                                    isFromApple: false);
-                                          } else if (args.isApple == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code:
-                                                        "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: false,
-                                                    isFromApple: true);
-                                          }
+                                          registerCubit.verifyMobile(
+                                            mobileId: args.mobileID!,
+                                            code: "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
+                                          );
                                         } else {
                                           setState(() {
                                             isValidCode = false;
@@ -480,23 +413,10 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
                                         if (formKey.currentState!.validate()) {
                                           isValidCode = true;
                                           print(args.mobileID);
-                                          if (args.isFromGoogle == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code: codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text,
-                                                    isFromGoogle: true,
-                                                    isFromApple: false
-                                            );
-                                          } else if (args.isApple == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code: codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text,
-                                                    isFromGoogle: false,
-                                                    isFromApple: true
-                                            );
-                                          }
+                                          registerCubit.verifyMobile(
+                                            mobileId: args.mobileID!,
+                                            code: "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
+                                          );
                                         } else {
                                           setState(() {
                                             isValidCode = false;
@@ -538,23 +458,10 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
                                         if (formKey.currentState!.validate()) {
                                           isValidCode = true;
                                           print(args.mobileID);
-                                          if (args.isFromGoogle == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code:
-                                                        "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: true,
-                                                    isFromApple: false);
-                                          } else if (args.isApple == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code:
-                                                        "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: false,
-                                                    isFromApple: true);
-                                          }
+                                          registerCubit.verifyMobile(
+                                            mobileId: args.mobileID!,
+                                            code: "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
+                                          );
                                         } else {
                                           setState(() {
                                             isValidCode = false;
@@ -606,23 +513,10 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
                                         if (formKey.currentState!.validate()) {
                                           isValidCode = true;
                                           print(args.mobileID);
-                                          if (args.isFromGoogle == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code:
-                                                        "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: true,
-                                                    isFromApple: false);
-                                          } else if (args.isApple == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code:
-                                                        "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: false,
-                                                    isFromApple: true);
-                                          }
+                                          registerCubit.verifyMobile(
+                                            mobileId: args.mobileID!,
+                                            code: "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
+                                          );
                                         } else {
                                           setState(() {
                                             isValidCode = false;
@@ -656,23 +550,10 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
                                         if (formKey.currentState!.validate()) {
                                           isValidCode = true;
                                           print(args.mobileID);
-                                          if (args.isFromGoogle == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code:
-                                                        "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: true,
-                                                    isFromApple: false);
-                                          } else if (args.isApple == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code:
-                                                        "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: false,
-                                                    isFromApple: true);
-                                          }
+                                          registerCubit.verifyMobile(
+                                            mobileId: args.mobileID!,
+                                            code: "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
+                                          );
                                         } else {
                                           setState(() {
                                             isValidCode = false;
@@ -740,30 +621,17 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
                                 title: AppLocalizations.of(context)!
                                     .translate('verify'),
                                 isLoading:
-                                    state is VerifyLoadingState ? true : false,
-                                onPressed: state is VerifyLoadingState
+                                    state is VerifyMobileLoading ? true : false,
+                                onPressed: state is VerifyMobileLoading
                                     ? () {}
                                     : () {
                                         if (formKey.currentState!.validate()) {
                                           isValidCode = true;
                                           print(args.mobileID);
-                                          if (args.isFromGoogle == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code:
-                                                        "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: true,
-                                                    isFromApple: false);
-                                          } else if (args.isApple == true) {
-                                            verifyCodeSocialCubit!
-                                                .verifyCodeSmsSocial(
-                                                    mobileId: args.mobileID!,
-                                                    code:
-                                                        "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
-                                                    isFromGoogle: false,
-                                                    isFromApple: true);
-                                          }
+                                          registerCubit.verifyMobile(
+                                            mobileId: args.mobileID!,
+                                            code: "${codeControllerOne.text + codeControllerTwo.text + codeControllerThree.text + codeControllerFour.text + codeControllerFive.text}",
+                                          );
                                         } else {
                                           setState(() {
                                             isValidCode = false;
@@ -775,12 +643,10 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
                             height: 15,
                           ),
                           DefaultText(
-                              text: state is VerifyCodeGoogleFaceError
-                                  ? (state
-                                      .verifyCodeEntity.errors?.first.message)
-                                  : state is SignInWithGoogleError
-                                      ? (state.googleSignInEntity.errors?.first
-                                          .message)
+                              text: state is VerifyMobileError
+                                  ? (state.message)
+                                  : state is RegisterGoogleError
+                                      ? (state.message)
                                       : '',
                               isTextTheme: true,
                               themeStyle: Theme.of(context)
@@ -827,7 +693,7 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
                                       codeControllerThree.clear();
                                       codeControllerFour.clear();
                                       codeControllerFive.clear();
-                                      verifyCodeSocialCubit!.resendCodeSms(
+                                      registerCubit.resendCodeSms(
                                           mobileId: args.mobileID!.toInt());
                                       isCountDown = true;
                                     }
@@ -985,7 +851,7 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
       );
 
 ////////////////////////////////////////////////////////////////////////////////
-  Widget _buildStack(var size, VerifyCodeSocialStates state,
+  Widget _buildStack(var size, RegisterStates state,
           ArgumentsResetPasswordVerifyCode args) =>
       Stack(
         children: [
@@ -1208,7 +1074,7 @@ class _VerifyCodeSocialState extends State<VerifyCodeSocial> {
                                 child: CustomRoundedButton(
                                   title: AppLocalizations.of(context)!
                                       .translate('verify'),
-                                  isLoading: state is VerifyLoadingState
+                                  isLoading: state is VerifyMobileLoading
                                       ? true
                                       : false,
                                   onPressed: () {},

@@ -1,30 +1,27 @@
+import 'package:auth_dexef/core/rest/image_paths.dart';
+import 'package:auth_dexef/core/widgets/login_widgets/social_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mydexef/core/class_constants/app_constants_values.dart';
-import 'package:mydexef/features/auth/presentation/cubit/1.login_cubit/login_cubit.dart';
-import '../../../../../../core/class_constants/Routes.dart';
-import '../../../../../../core/class_constants/constants_methods.dart';
-import '../../../../../../core/firebase_authentication.dart';
-import '../../../../../../core/widgets/default_text.dart';
 import '../../../../../../core/size_widgets/app_font_style.dart';
-import '../../../../../../style/colors/colors.dart';
-import '../../../../../../utils/app_localizations.dart';
-import '../../../../../../utils/cash_helper.dart';
-import '../../../../../../utils/constants.dart';
-import '../../../../login/presentation/cubit/login_state.dart';
+import '../../../features/login/presentation/cubit/login_cubit.dart';
+import '../../../features/login/presentation/cubit/login_state.dart';
+import '../../rest/app_constants.dart';
+import '../../rest/app_localizations.dart';
+import '../../rest/firebase_auth.dart';
+import '../../rest/methods.dart';
+import '../../theme/colors.dart';
+import '../public/default_text.dart';
 
 class PreviousSignSocialWidget extends StatelessWidget {
   final LoginCubit loginCubit;
-  final String emailType;
+  final String loginType;
   final String phoneText;
   final LoginState state;
   const PreviousSignSocialWidget({
     super.key,
     required this.loginCubit,
-    required this.emailType,
+    required this.loginType,
     required this.phoneText,
     required this.state
   });
@@ -60,7 +57,7 @@ class PreviousSignSocialWidget extends StatelessWidget {
           highlightColor: Colors.transparent,  // Removes the background highlight color
           splashColor: Colors.transparent,     // Removes the splash color
           onTap: () {
-         loginCubit.modifyData();
+            loginCubit.modifyData();
           },
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
@@ -75,109 +72,55 @@ class PreviousSignSocialWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 30),
-        emailType == AppConstants.googleString ? InkWell(
-          hoverColor: Colors.transparent,
-          highlightColor: Colors.transparent,  // Removes the background highlight color
-          splashColor: Colors.transparent,     // Removes the splash color
-          onTap: state is SignInWithGoogleWebLoading ||
-              state is LoginWithGoogleLoading ||
-              state is SignInWithGoogleLoading ? null : () async {
-            if (kIsWeb) {
-              loginCubit.errorMessage = null;
-              loginCubit.signInWithGoogleWeb().then((value) {
-                if (loginCubit.credGoogleWeb?.credential?.accessToken != null) {
-                  loginCubit.loginWithGoogle(token: '${loginCubit.credGoogleWeb?.credential?.accessToken}');
-                }
-              });
-            } else {
-              loginCubit.signInWithGoogle().then((value) {
-                loginCubit.loginWithGoogle(
-                    token: "${googleAuth?.accessToken}");
-              });
-            }
-          },
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Container(
-              height: 48,
-              //padding: EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                  color: state is SignInWithGoogleWebLoading ||
-                      state is LoginWithGoogleLoading ||
-                      state is SignInWithGoogleLoading
-                      ? opacityGoogle
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: brushBorder,
-                  )),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  getImage(path: 'images/signin_google.svg', isSvg: true),
-                  const SizedBox(height: 5),
-                  DefaultText(
-                      text: AppLocalizations.of(context)!
-                          .translate('signGoogle'),
-                      isTextTheme: true,
-                      themeStyle: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(
-                        fontSize:
-                        AppFontStyle.appFontSize.setFontSize(context, webFontSize: 13, mobileFontSize: 11.sp),
-                      )),
-                ],
-              ),
-            ),
-          ),
-        ) : const SizedBox(),
-        const SizedBox(height: 16),
-        emailType == AppConstants.appleString
-            ? InkWell(
-          hoverColor: Colors.transparent,
-          highlightColor: Colors.transparent,  // Removes the background highlight color
-          splashColor: Colors.transparent,     // Removes the splash color
-          onTap: state is AppleSignInLoading || state is SignUpAppleLoading ? null : () async {
-            loginCubit.signUpWithApple();
-          },
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Container(
-              height: 48,
-              //padding: EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                  color: state is SignInWithFacebookWebLoading ||
-                      state is LoginWithFacebookLoading ||
-                      state is SignInWithFacebookLoading
-                      ? opacityGoogle
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: brushBorder,
-                  )),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  getImage(path: 'images/apple.svg', isSvg: true),
-                  const SizedBox(width: 5),
-                  DefaultText(
-                      text: AppLocalizations.of(context)!
-                          .translate('signApple'),
-                      isTextTheme: true,
-                      themeStyle: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(
-                        fontSize:
-                        AppFontStyle.appFontSize.setFontSize(context, webFontSize: 13, mobileFontSize: 11.sp),
-                      )),
-                ],
-              ),
-            ),
-          ),
-        ): const SizedBox(),
+        getSocialButton(context),
       ],
     );
+  }
+////////////////////////////////////////////////////////////////////////////////
+  Widget getSocialButton(BuildContext context){
+    if(loginType == AppConstants.googleString){
+      return SocialButton(
+        buttonColor: state is SignInWithGoogleWebLoading ||
+            state is LoginWithGoogleLoading ||
+            state is SignInWithGoogleMobileLoading
+            ? opacityGoogle
+            : Colors.white,
+        preventTap: state is SignInWithGoogleWebLoading ||
+            state is LoginWithGoogleLoading ||
+            state is SignInWithGoogleMobileLoading,
+        onTap: () async {
+          if (kIsWeb) {
+            loginCubit.errorMessage = null;
+            loginCubit.signInWithGoogleWeb(true).then((value) {
+              if (loginCubit.credGoogleWeb?.credential?.accessToken != null) {
+                loginCubit.loginWithGoogle(token: '${loginCubit.credGoogleWeb?.credential?.accessToken}');
+              }
+            });
+          } else {
+            loginCubit.signInWithGoogle().then((value) {
+              loginCubit.loginWithGoogle(
+                  token: "${googleAuth?.accessToken}");
+            });
+          }
+        },
+        imagePath: ImagesPath.googleIcon,
+        text: AppLocalizations.of(context)!.translate('signGoogle'),
+      );
+    }else if(loginType == AppConstants.appleString){
+      return SocialButton(
+        buttonColor: state is SignInAppleLoadingFirebase ||
+            state is LoginWithAppleLoading
+            ? opacityGoogle
+            : Colors.white,
+        preventTap: state is LoginWithAppleLoading || state is SignInAppleLoadingFirebase,
+        onTap: () async {
+          loginCubit.signInWithAppleWeb(context);
+        },
+        imagePath: ImagesPath.appleIcon,
+        text: AppLocalizations.of(context)!.translate('signApple'),
+      );
+    }else{
+      return const SizedBox();
+    }
   }
 }
